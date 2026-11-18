@@ -1,0 +1,65 @@
+name: Deploy GNZ Portal to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Instalar Dependências
+        run: npm ci || npm install
+
+      - name: Validar Tipagem (Typecheck)
+        run: npx tsc -b
+
+      - name: Build de Produção
+        run: npm run build
+        env:
+          VITE_BASE_PATH: "/${{ github.event.repository.name }}/"
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL || 'https://mffrafqyjbjitlhjnlai.supabase.co' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_PORTAL_STORE_ID: ${{ secrets.VITE_PORTAL_STORE_ID || vars.VITE_PORTAL_STORE_ID || 'f8fdfd0e-a13a-44a6-ba98-53e61be300db' }}
+          VITE_PORTAL_HBAC_TOKEN: ${{ secrets.VITE_PORTAL_HBAC_TOKEN || vars.VITE_PORTAL_HBAC_TOKEN }}
+          VITE_PORTAL_STORE_SLUG: ${{ vars.VITE_PORTAL_STORE_SLUG || 'gnz-hortifruti' }}
+          VITE_PORTAL_BRAND_PRIMARY: ${{ vars.VITE_PORTAL_BRAND_PRIMARY || '#16a34a' }}
+          VITE_PORTAL_BRAND_ACCENT: ${{ vars.VITE_PORTAL_BRAND_ACCENT || '#f59e0b' }}
+
+      - name: Upload Artifact para GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy para GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
