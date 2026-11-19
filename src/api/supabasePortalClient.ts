@@ -404,4 +404,41 @@ export const supabasePortalApi = {
       portalSupabase.removeChannel(channel)
     }
   },
+
+  /**
+   * Grava o consentimento de cookies da LGPD diretamente no banco de dados Supabase
+   * via RPC atômica record_cookie_consent.
+   */
+  async recordCookieConsent(payload: {
+    visitorId: string
+    analytics: boolean
+    marketing: boolean
+    userAgent?: string
+    pageUrl?: string
+    referrer?: string
+    metadata?: Record<string, any>
+  }): Promise<{ success: boolean; id: string; visitorId: string } | null> {
+    try {
+      const { data, error } = await portalSupabase.rpc('record_cookie_consent', {
+        p_store_id: portalConfig.storeId,
+        p_visitor_id: payload.visitorId,
+        p_analytics: payload.analytics,
+        p_marketing: payload.marketing,
+        p_user_agent: payload.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : null),
+        p_page_url: payload.pageUrl || (typeof window !== 'undefined' ? window.location.href : null),
+        p_referrer: payload.referrer || (typeof document !== 'undefined' ? document.referrer : null),
+        p_metadata: payload.metadata || {},
+      })
+
+      if (error) {
+        console.warn('Falha ao registrar consentimento de cookies no banco:', error.message)
+        return null
+      }
+
+      return data as { success: boolean; id: string; visitorId: string }
+    } catch (err) {
+      console.warn('Erro ao conectar ao Supabase para cookies:', err)
+      return null
+    }
+  },
 }

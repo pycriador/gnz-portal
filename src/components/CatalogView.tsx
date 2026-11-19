@@ -23,11 +23,17 @@ import {
 } from '../utils/portalFormatters'
 import { Header } from './Header'
 import { CategoryNav } from './CategoryNav'
-import { HeroBanner } from './HeroBanner'
+import { PromoSlider } from './PromoSlider'
+import { CategoryCircles } from './CategoryCircles'
+import { OffersShowcase } from './OffersShowcase'
+import { DailyFavoritesSection } from './DailyFavoritesSection'
+import { CategoryShowcaseSection } from './CategoryShowcaseSection'
 import { ProductGrid } from './ProductGrid'
 import { CartDrawer } from './CartDrawer'
 import { RecentOrdersModal } from './RecentOrdersModal'
 import { WeightSelectorModal } from './WeightSelectorModal'
+import { CookieConsentBanner } from './CookieConsentBanner'
+import { ArrowLeft, RotateCcw, Sparkles } from 'lucide-react'
 
 interface CatalogViewProps {
   store: PortalStore
@@ -47,9 +53,10 @@ export function CatalogView({
   onCredentialInvalidated,
 }: CatalogViewProps) {
   const [categories, setCategories] = React.useState<PortalCategory[]>([])
-  const [products, setProducts] = React.useState<PortalProduct[]>([])
+  const [allProducts, setAllProducts] = React.useState<PortalProduct[]>([])
+  const [filteredProducts, setFilteredProducts] = React.useState<PortalProduct[]>([])
   const [totalProducts, setTotalProducts] = React.useState(0)
-  const [loadingProducts, setLoadingProducts] = React.useState(true)
+  const [loading, setLoading] = React.useState(true)
 
   // Filtros, ordenação e paginação
   const [search, setSearch] = React.useState('')
@@ -57,9 +64,7 @@ export function CatalogView({
   const [sortBy, setSortBy] = React.useState('default')
   const [onlyKg, setOnlyKg] = React.useState(false)
   const [page, setPage] = React.useState(1)
-  const [pageSize, setPageSize] = React.useState<number>(
-    store.theme_config?.catalogPageSize || portalConfig.branding.defaultPageSize || 24
-  )
+  const [pageSize, setPageSize] = React.useState<number>(24)
 
   // Carrinho persistido
   const [cart, setCart] = React.useState<PortalCartItem[]>(() => {
@@ -94,6 +99,8 @@ export function CatalogView({
   const primaryColor =
     store.theme_config?.primaryColor || portalConfig.branding.primaryColor || '#16a34a'
 
+  const offersRef = React.useRef<HTMLDivElement>(null)
+
   React.useEffect(() => {
     try {
       window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
@@ -102,33 +109,20 @@ export function CatalogView({
     }
   }, [cart])
 
-  // Carrega categorias da loja
-  React.useEffect(() => {
-    supabasePortalApi
-      .fetchStoreCategories()
-      .then(setCategories)
-      .catch((err) => {
-        const credErr = classifyPortalApiError(err)
-        if (credErr) onCredentialInvalidated(credErr)
-      })
-  }, [onCredentialInvalidated])
-
-  // Carrega produtos da vitrine
+  // Carrega categorias e catálogo completo da loja
   React.useEffect(() => {
     let active = true
-    setLoadingProducts(true)
+    setLoading(true)
 
-    supabasePortalApi
-      .fetchCatalogProducts({
-        search: search.trim() || undefined,
-        categoryId: selectedCategory || undefined,
-        page,
-        pageSize,
-      })
-      .then((res) => {
+    Promise.all([
+      supabasePortalApi.fetchStoreCategories(),
+      supabasePortalApi.fetchCatalogProducts({ pageSize: 100 }),
+    ])
+      .then(([cats, prodsRes]) => {
         if (!active) return
-        setProducts(res.data)
-        setTotalProducts(res.total)
+        setCategories(cats)
+        setAllProducts(prodsRes.data)
+        setTotalProducts(prodsRes.total)
       })
       .catch((err) => {
         if (!active) return
@@ -136,17 +130,51 @@ export function CatalogView({
         if (credErr) onCredentialInvalidated(credErr)
       })
       .finally(() => {
-        if (active) setLoadingProducts(false)
+        if (active) setLoading(false)
       })
 
     return () => {
       active = false
     }
-  }, [search, selectedCategory, page, pageSize, onCredentialInvalidated])
+  }, [onCredentialInvalidated])
 
-  // Filtro e ordenação dos produtos exibidos
-  const displayedProducts = React.useMemo(() => {
-    let list = [...products]
+  // Mapeia produtos por categoria para as vitrines individuais
+  const productsByCategory = React.useMemo(() => {
+    const map: Record<string, PortalProduct[]> = {}
+    for (const p of allProducts) {
+      if (p.category_id) {
+        if (!map[p.category_id]) map[p.category_id] = []
+        map[p.category_id].push(p)
+      }
+    }
+    return map
+  }, [allProducts])
+
+  const productCountByCategory = React.useMemo(() => {
+    const map: Record<string, number> = {}
+    for (const [catId, prods] of Object.entries(productsByCategory)) {
+      map[catId] = prods.length
+    }
+    return map
+  }, [productsByCategory])
+
+  // Efeito de busca ou filtro por categoria específica
+  React.useEffect(() => {
+    let list = [...allProducts]
+
+    if (search.trim()) {
+      const term = search.toLowerCase().trim()
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(term) ||
+          (p.description && p.description.toLowerCase().includes(term)) ||
+          p.sku.toLowerCase().includes(term)
+      )
+    }
+
+    if (selectedCategory) {
+      list = list.filter((p) => p.category_id === selectedCategory)
+    }
 
     if (onlyKg) {
       list = list.filter((p) => isWeighedProduct(p))
@@ -160,10 +188,15 @@ export function CatalogView({
       list.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
     }
 
-    return list
-  }, [products, onlyKg, sortBy])
+    setFilteredProducts(list)
+  }, [allProducts, search, selectedCategory, onlyKg, sortBy])
 
-  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize))
+  // Paginação dos produtos filtrados
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
+  const paginatedProducts = React.useMemo(() => {
+    const from = (page - 1) * pageSize
+    return filteredProducts.slice(from, from + pageSize)
+  }, [filteredProducts, page, pageSize])
 
   const cartTotal = React.useMemo(
     () => cart.reduce((acc, item) => acc + item.quantity * item.product.selling_price, 0),
@@ -235,6 +268,23 @@ export function CatalogView({
     setOnlyKg(false)
     setSortBy('default')
     setPage(1)
+  }
+
+  const handleScrollToOffers = () => {
+    if (offersRef.current) {
+      offersRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const handleSelectCategoryByName = (categoryName: string) => {
+    const found = categories.find((c) =>
+      c.name.toLowerCase().includes(categoryName.toLowerCase())
+    )
+    if (found) {
+      setSelectedCategory(found.id)
+      setPage(1)
+      window.scrollTo({ top: 380, behavior: 'smooth' })
+    }
   }
 
   const handleCheckoutSubmit = async (alsoSendWhatsApp: boolean) => {
@@ -325,8 +375,11 @@ export function CatalogView({
     }
   }
 
+  const isBrowsingAll = !search && !selectedCategory
+  const activeCategoryObj = categories.find((c) => c.id === selectedCategory)
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-600 selection:text-white">
       {/* 1. Header E-commerce Estilo Oba com busca ampla e sacola */}
       <Header
         store={store}
@@ -356,56 +409,150 @@ export function CatalogView({
         primaryColor={primaryColor}
       />
 
-      {/* 3. Área Principal de Conteúdo Ampla (Full-Width / Max 1440px) */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner Promocional & Atalhos Visuais (Ocultos quando houver busca ativa) */}
-        {!search && (
-          <HeroBanner
-            store={store}
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={(id) => {
-              setSelectedCategory(id)
-              setPage(1)
-            }}
-            primaryColor={primaryColor}
-          />
-        )}
+      {/* 3. Área Principal de Conteúdo Ampla (Full-Width / Max 1536px) */}
+      <main className="flex-1 max-w-[1536px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 space-y-8">
+        {/* MODO 1: PÁGINA INICIAL RICA COM VITRINES E SEÇÕES INDIVIDUAIS (SEM BUSCA/FILTRO) */}
+        {isBrowsingAll ? (
+          <>
+            {/* Slider de 5 Promoções do Mês (Padrão Oba) */}
+            <PromoSlider
+              onSelectCategory={handleSelectCategoryByName}
+              onScrollToOffers={handleScrollToOffers}
+              primaryColor={primaryColor}
+            />
 
-        {/* Vitrine de Produtos com Grid Amplo de 2 a 6 colunas */}
-        <ProductGrid
-          products={displayedProducts}
-          totalProducts={totalProducts}
-          loading={loadingProducts}
-          cart={cart}
-          onAddProduct={handleAddProduct}
-          onUpdateQty={handleUpdateQty}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          onlyKg={onlyKg}
-          onToggleOnlyKg={() => setOnlyKg((k) => !k)}
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          pageSize={pageSize}
-          onPageSizeChange={(newSize) => {
-            setPageSize(newSize)
-            setPage(1)
-          }}
-          search={search}
-          onClearFilters={handleClearFilters}
-          primaryColor={primaryColor}
-        />
+            {/* Navegue por Categorias com Ícones Elegantes e Contagens */}
+            <CategoryCircles
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(id) => {
+                setSelectedCategory(id)
+                setPage(1)
+              }}
+              productCountByCategory={productCountByCategory}
+            />
+
+            {/* Bloco de Ofertas da Semana com Imagem Preparada à Esquerda e Slider à Direita */}
+            <div ref={offersRef}>
+              <OffersShowcase
+                products={allProducts}
+                cart={cart}
+                onAddProduct={handleAddProduct}
+                onUpdateQty={handleUpdateQty}
+                onViewAllOffers={() => {
+                  setSortBy('price_asc')
+                  setSelectedCategory('')
+                  window.scrollTo({ top: 900, behavior: 'smooth' })
+                }}
+                primaryColor={primaryColor}
+              />
+            </div>
+
+            {/* Favoritos do Dia a Dia */}
+            <DailyFavoritesSection
+              products={allProducts}
+              cart={cart}
+              onAddProduct={handleAddProduct}
+              onUpdateQty={handleUpdateQty}
+              primaryColor={primaryColor}
+            />
+
+            {/* Vitrines Individuais por Categoria */}
+            <div className="space-y-8 pt-2">
+              <div className="flex items-center gap-2 px-1">
+                <Sparkles className="h-5 w-5 text-emerald-600" />
+                <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Vitrines por Departamento
+                </h2>
+              </div>
+
+              {categories.map((category) => {
+                const catProducts = productsByCategory[category.id] || []
+                if (catProducts.length === 0) return null
+
+                return (
+                  <CategoryShowcaseSection
+                    key={category.id}
+                    category={category}
+                    products={catProducts}
+                    cart={cart}
+                    onAddProduct={handleAddProduct}
+                    onUpdateQty={handleUpdateQty}
+                    onSelectCategory={(catId) => {
+                      setSelectedCategory(catId)
+                      setPage(1)
+                      window.scrollTo({ top: 300, behavior: 'smooth' })
+                    }}
+                    primaryColor={primaryColor}
+                  />
+                )
+              })}
+            </div>
+          </>
+        ) : (
+          /* MODO 2: NAVEGAÇÃO FOCADA (BUSCA ATIVA OU CATEGORIA SELECIONADA) */
+          <div className="space-y-6">
+            {/* Barra de Retorno e Indicador de Filtro */}
+            <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs">
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Voltar à vitrine principal</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                {activeCategoryObj && (
+                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                    Categoria: {activeCategoryObj.name}
+                  </span>
+                )}
+                {search && (
+                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                    Busca: &quot;{search}&quot;
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Grid Amplo com Ordenação e Paginação */}
+            <ProductGrid
+              products={paginatedProducts}
+              totalProducts={filteredProducts.length}
+              loading={loading}
+              cart={cart}
+              onAddProduct={handleAddProduct}
+              onUpdateQty={handleUpdateQty}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              onlyKg={onlyKg}
+              onToggleOnlyKg={() => setOnlyKg((k) => !k)}
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              pageSize={pageSize}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize)
+                setPage(1)
+              }}
+              search={search}
+              onClearFilters={handleClearFilters}
+              primaryColor={primaryColor}
+            />
+          </div>
+        )}
       </main>
 
       {/* 4. Rodapé Limpo */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-[1440px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-8 text-center text-xs text-slate-500 mt-12">
+        <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>
             © {new Date().getFullYear()} <strong>{store.name}</strong> • Catálogo Online e Rastreamento de Pedidos em Tempo Real.
           </p>
           <div className="flex items-center gap-4 text-slate-400">
-            <span>Desenvolvido com tecnologia de estoque ao vivo</span>
+            <span>Tecnologia de Estoque & Balança ao Vivo</span>
           </div>
         </div>
       </footer>
@@ -450,6 +597,9 @@ export function CatalogView({
         checkoutError={checkoutError}
         primaryColor={primaryColor}
       />
+
+      {/* Banner de Cookies com Gravação Real no Supabase */}
+      <CookieConsentBanner primaryColor={primaryColor} />
     </div>
   )
 }
