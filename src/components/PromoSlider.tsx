@@ -31,7 +31,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80',
     gradient: 'from-brand-charcoal/95 via-brand-charcoal/80 to-transparent',
-    accentColor: '#2E7D32',
+    accentColor: '#1B6B1E',
     ctaText: 'Aproveitar a Feira',
   },
   {
@@ -44,7 +44,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=1600&q=80',
     gradient: 'from-brand-charcoal/95 via-brand-charcoal/80 to-transparent',
-    accentColor: '#2E7D32',
+    accentColor: '#1B6B1E',
     ctaText: 'Ver Frutas Selecionadas',
     targetCategory: 'Frutas',
   },
@@ -58,7 +58,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?auto=format&fit=crop&w=1600&q=80',
     gradient: 'from-brand-charcoal/95 via-brand-primary/50 to-transparent',
-    accentColor: '#2E7D32',
+    accentColor: '#1B6B1E',
     ctaText: 'Ver Verduras & Legumes',
     targetCategory: 'Verduras e Legumes',
   },
@@ -72,7 +72,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1600&q=80',
     gradient: 'from-brand-charcoal/95 via-brand-charcoal/80 to-transparent',
-    accentColor: '#2E7D32',
+    accentColor: '#1B6B1E',
     ctaText: 'Conferir Folhas & Saladas',
     targetCategory: 'Seleção Praticidade',
   },
@@ -86,7 +86,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80',
     gradient: 'from-brand-charcoal/95 via-brand-charcoal/85 to-transparent',
-    accentColor: '#2E7D32',
+    accentColor: '#1B6B1E',
     ctaText: 'Ver Cogumelos & Especiais',
     targetCategory: 'Cogumelos',
   },

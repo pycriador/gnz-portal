@@ -13,12 +13,12 @@ import {
   Phone,
   RefreshCw,
   ShoppingBag,
-  Store as StoreIcon,
   Truck,
   User,
 } from 'lucide-react'
 import { supabasePortalApi } from '../api/supabasePortalClient'
 import type { PortalOrderStatus, PortalOrderTracking } from '../types/portal.types'
+import gnzLogo from '../assets/gnz-logo.png'
 import {
   PAYMENT_METHOD_LABELS,
   buildPortalOrderTrackingUrl,
@@ -235,17 +235,13 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
       <header className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            {store?.logo_url ? (
+            <span className="inline-flex items-center rounded-lg shrink-0 dark:bg-white/95 dark:px-2 dark:py-0.5">
               <img
-                src={store.logo_url}
-                alt={store.name}
-                className="h-10 w-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
+                src={gnzLogo}
+                alt={store?.name || 'GNZ Hortifruti'}
+                className="h-9 w-auto object-contain"
               />
-            ) : (
-              <div className="h-10 w-10 rounded-xl bg-brand-primary/10 text-brand-primary dark:text-brand-light flex items-center justify-center">
-                <StoreIcon className="h-5 w-5" />
-              </div>
-            )}
+            </span>
             <div className="min-w-0">
               <h1 className="text-sm font-bold truncate">{store?.name || 'Acompanhamento de Pedido'}</h1>
               <p className="text-[11px] text-slate-500 flex items-center gap-1.5">

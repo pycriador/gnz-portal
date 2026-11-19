@@ -6,7 +6,6 @@ import {
   Phone,
   Search,
   ShoppingBag,
-  Store as StoreIcon,
   Sun,
   Truck,
   X,
@@ -14,6 +13,7 @@ import {
 import type { PortalStore } from '../types/portal.types'
 import { formatCurrency } from '../utils/portalFormatters'
 import { portalConfig } from '../config/portal.config'
+import gnzLogo from '../assets/gnz-logo.png'
 
 interface HeaderProps {
   store: PortalStore
@@ -84,33 +84,19 @@ export function Header({
       {/* 2. Barra Principal do Cabeçalho */}
       <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-3.5">
         <div className="flex items-center justify-between gap-4 md:gap-8">
-          {/* Logo e Nome da Loja */}
+          {/* Logo da Loja */}
           <div className="flex items-center gap-3 shrink-0">
-            {store.logo_url ? (
+            <a
+              href="#/"
+              className="inline-flex items-center rounded-xl transition-opacity hover:opacity-90 dark:bg-white/95 dark:px-2.5 dark:py-1"
+              title={store.name}
+            >
               <img
-                src={store.logo_url}
-                alt={store.name}
-                className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shadow-2xs"
+                src={gnzLogo}
+                alt={store.name || 'GNZ Hortifruti'}
+                className="h-11 sm:h-12 w-auto object-contain"
               />
-            ) : (
-              <div
-                className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl flex items-center justify-center text-white shadow-2xs"
-                style={{ backgroundColor: primaryColor }}
-              >
-                <StoreIcon className="h-6 w-6" />
-              </div>
-            )}
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-base sm:text-xl font-black tracking-tight text-brand-charcoal dark:text-white truncate">
-                  {store.name}
-                </span>
-              </div>
-              <span className="inline-block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-primary dark:text-brand-light">
-                Hortifruti & Mercado Fresco
-              </span>
-            </div>
+            </a>
           </div>
 
           {/* Barra de Busca Central Proeminente (Padrão Oba) */}

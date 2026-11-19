@@ -34,6 +34,7 @@ import { RecentOrdersModal } from './RecentOrdersModal'
 import { WeightSelectorModal } from './WeightSelectorModal'
 import { CookieConsentBanner } from './CookieConsentBanner'
 import { ArrowLeft } from 'lucide-react'
+import gnzLogo from '../assets/gnz-logo.png'
 
 interface CatalogViewProps {
   store: PortalStore
@@ -98,9 +99,11 @@ export function CatalogView({
 
   const configuredPrimary = store.theme_config?.primaryColor
   const primaryColor =
-    configuredPrimary && configuredPrimary.toLowerCase() !== '#16a34a'
+    configuredPrimary &&
+    configuredPrimary.toLowerCase() !== '#16a34a' &&
+    configuredPrimary.toLowerCase() !== '#2e7d32'
       ? configuredPrimary
-      : portalConfig.branding.primaryColor || '#2E7D32'
+      : portalConfig.branding.primaryColor || '#1B6B1E'
 
   const offersRef = React.useRef<HTMLDivElement>(null)
 
@@ -551,9 +554,18 @@ export function CatalogView({
       {/* 4. Rodapé Limpo */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-brand-charcoal py-8 text-center text-xs text-slate-500 dark:text-slate-400 mt-12">
         <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>
-            © {new Date().getFullYear()} <strong>{store.name}</strong> • Catálogo Online e Rastreamento de Pedidos em Tempo Real.
-          </p>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center rounded-lg dark:bg-white/95 dark:px-2 dark:py-0.5">
+              <img
+                src={gnzLogo}
+                alt={store.name || 'GNZ Hortifruti'}
+                className="h-7 w-auto object-contain"
+              />
+            </span>
+            <p className="text-left">
+              © {new Date().getFullYear()} <strong>{store.name}</strong> • Catálogo Online e Rastreamento de Pedidos.
+            </p>
+          </div>
           <div className="flex items-center gap-4 text-slate-400">
             <span>Tecnologia de Estoque & Balança ao Vivo</span>
           </div>

@@ -27,7 +27,7 @@ As cores da marca são centralizadas em variáveis CSS com canais RGB em [`src/i
 
 | Nome | Hex | Token Tailwind | Uso no Layout |
 | :--- | :--- | :--- | :--- |
-| **Verde GNZ** | `#2E7D32` | `brand-primary` | Cor principal: barra superior, botões de CTA, preços no modo claro, links e abas ativas |
+| **Verde GNZ** | `#1B6B1E` | `brand-primary` | Cor principal (harmonizada com o verde botânico do logo `#036101`): barra superior, botões de CTA, preços no modo claro, links e abas ativas |
 | **Carvão** | `#111827` | `brand-charcoal` | Tipografia principal, fundos do modo escuro, overlays dos banners e alto contraste sobre Craft |
 | **Verde Claro** | `#81C784` | `brand-light` | Preços e destaques no modo escuro, ponto pulsante de status ao vivo e acentos sobre fundos escuros |
 | **Craft** | `#B68652` | `brand-craft` / `brand-accent` | Acento artesanal: selo `Kg`, filtro *Por Quilo*, contador da sacola, tags de oferta e indicador do slider |
@@ -147,5 +147,5 @@ Variáveis e segredos configurados no GitHub Actions:
 - `VITE_PORTAL_HBAC_TOKEN` (Secret/Variable)
 - `VITE_PORTAL_STORE_ID` (Variable)
 - `VITE_PORTAL_STORE_SLUG` (Variable)
-- `VITE_PORTAL_BRAND_PRIMARY` (Variable — padrão `#2E7D32`)
+- `VITE_PORTAL_BRAND_PRIMARY` (Variable — padrão `#1B6B1E`)
 - `VITE_PORTAL_BRAND_ACCENT` (Variable — padrão `#B68652`)
