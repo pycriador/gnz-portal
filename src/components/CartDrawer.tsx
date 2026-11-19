@@ -75,13 +75,13 @@ export function CartDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+      <div className="w-full max-w-lg bg-white dark:bg-brand-charcoal h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
         {/* Cabeçalho da Sacola */}
         <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <ShoppingBag className="h-5 w-5 text-emerald-600" />
+            <ShoppingBag className="h-5 w-5 text-brand-primary dark:text-brand-light" />
             <div>
-              <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+              <h2 className="text-sm sm:text-base font-extrabold text-brand-charcoal dark:text-white">
                 Sua Sacola de Compras
               </h2>
               <span className="text-[11px] text-slate-500 font-medium">
@@ -101,8 +101,8 @@ export function CartDrawer({
         </div>
 
         {/* Faixa Informativa de Entrega Fresca */}
-        <div className="px-5 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 border-b border-emerald-100 dark:border-emerald-900/40 flex items-center gap-2 text-[11px] text-emerald-800 dark:text-emerald-300 font-medium">
-          <Truck className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+        <div className="px-5 py-2.5 bg-brand-primary/10 dark:bg-brand-primary/20 border-b border-brand-primary/20 flex items-center gap-2 text-[11px] text-brand-charcoal dark:text-brand-light font-medium">
+          <Truck className="h-3.5 w-3.5 shrink-0 text-brand-primary dark:text-brand-light" />
           <span>Separação imediata na loja e baixa em tempo real no estoque.</span>
         </div>
 
@@ -196,7 +196,7 @@ export function CartDrawer({
                           </button>
                         </div>
 
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 min-w-[65px] text-right">
+                        <span className="text-xs font-black text-brand-primary dark:text-brand-light min-w-[65px] text-right">
                           {formatCurrency(lineTotal)}
                         </span>
 
@@ -229,7 +229,7 @@ export function CartDrawer({
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     placeholder="Ex.: Maria Oliveira"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
 
@@ -242,7 +242,7 @@ export function CartDrawer({
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     placeholder="(11) 99999-9999"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
 
@@ -255,7 +255,7 @@ export function CartDrawer({
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
                     placeholder="Rua, Número, Bairro, Complemento"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   />
                 </div>
 
@@ -303,7 +303,7 @@ export function CartDrawer({
           <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-500">Total do Pedido:</span>
-              <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
+              <span className="text-xl font-black text-brand-primary dark:text-brand-light">
                 {formatCurrency(cartTotal)}
               </span>
             </div>
@@ -323,7 +323,7 @@ export function CartDrawer({
                 type="button"
                 disabled={submitting}
                 onClick={() => onSubmitCheckout(true)}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-emerald-600 text-emerald-700 dark:text-emerald-300 text-xs font-black hover:bg-emerald-500/10 transition active:scale-98 disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-brand-primary dark:border-brand-light text-brand-primary dark:text-brand-light text-xs font-black hover:bg-brand-primary/10 transition active:scale-98 disabled:opacity-50"
               >
                 <MessageCircle className="h-4 w-4" />
                 Finalizar + Enviar no WhatsApp da Loja

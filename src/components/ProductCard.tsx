@@ -22,9 +22,9 @@ export function ProductCard({
   const inCart = Boolean(cartItem)
 
   return (
-    <article className="group rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs hover:shadow-lg hover:border-emerald-500/40 dark:hover:border-emerald-500/40 transition-all duration-200 flex flex-col justify-between">
+    <article className="group h-full min-w-0 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs hover:shadow-lg hover:border-brand-primary/40 dark:hover:border-brand-light/40 transition-all duration-200 flex flex-col justify-between">
       {/* 1. Imagem e Badges */}
-      <div className="relative aspect-square bg-slate-50 dark:bg-slate-800/60 overflow-hidden flex items-center justify-center p-3">
+      <div className="relative aspect-square bg-slate-50 dark:bg-slate-800/60 overflow-hidden flex items-center justify-center p-2 sm:p-3">
         {product.primary_image_url ? (
           <img
             src={product.primary_image_url}
@@ -41,14 +41,14 @@ export function ProductCard({
 
         {/* Badge de Categoria */}
         {product.category_name && (
-          <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs backdrop-blur-xs">
+          <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 max-w-[calc(100%-3.5rem)] truncate px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/90 dark:bg-brand-charcoal/90 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs backdrop-blur-xs">
             {product.category_name}
           </span>
         )}
 
         {/* Badge de Produto Pesável */}
         {isKg && (
-          <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black bg-amber-500 text-white shadow-2xs">
+          <span className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] font-black bg-brand-craft text-brand-charcoal shadow-2xs">
             <Scale className="h-3 w-3" />
             <span>Kg</span>
           </span>
@@ -56,9 +56,9 @@ export function ProductCard({
       </div>
 
       {/* 2. Informações do Produto */}
-      <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between space-y-3">
+      <div className="p-2.5 sm:p-4 flex-1 flex flex-col justify-between space-y-2.5 sm:space-y-3">
         <div className="space-y-1">
-          <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+          <h3 className="text-xs sm:text-sm font-bold text-brand-charcoal dark:text-white line-clamp-2 leading-snug group-hover:text-brand-primary dark:group-hover:text-brand-light transition-colors">
             {product.name}
           </h3>
 
@@ -79,7 +79,7 @@ export function ProductCard({
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
           <div className="flex items-baseline justify-between">
             <div className="flex items-baseline gap-1">
-              <span className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+              <span className="text-sm sm:text-base font-black text-brand-primary dark:text-brand-light tracking-tight">
                 {formatCurrency(product.selling_price)}
               </span>
               <span className="text-[11px] font-semibold text-slate-400">
@@ -96,11 +96,11 @@ export function ProductCard({
 
           {/* Stepper Inline: controle diretamente no card */}
           {inCart && cartItem ? (
-            <div className="flex items-center justify-between gap-1 rounded-xl bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 p-1">
+            <div className="flex items-center justify-between gap-1 rounded-xl bg-brand-primary/10 dark:bg-brand-primary/20 border border-brand-primary/30 p-1">
               <button
                 type="button"
                 onClick={() => onUpdateQty(product.id, -1)}
-                className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-2xs active:scale-90 transition"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-white dark:bg-brand-charcoal flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-2xs active:scale-90 transition"
                 title="Diminuir quantidade"
               >
                 <Minus className="h-3.5 w-3.5" />
@@ -109,7 +109,7 @@ export function ProductCard({
               <button
                 type="button"
                 onClick={() => isKg && onAdd(product)}
-                className="text-xs font-black text-emerald-800 dark:text-emerald-300 px-1 truncate hover:underline"
+                className="text-xs font-black text-brand-primary dark:text-brand-light px-1 truncate hover:underline"
                 title={isKg ? 'Clique para ajustar o peso exato' : undefined}
               >
                 {isKg ? formatProductWeight(cartItem.quantity) : `${cartItem.quantity} un`}
@@ -129,7 +129,7 @@ export function ProductCard({
             <button
               type="button"
               onClick={() => onAdd(product)}
-              className="w-full inline-flex items-center justify-center gap-1.5 py-2 sm:py-2.5 px-3 rounded-xl text-white text-xs font-bold shadow-2xs transition hover:opacity-95 active:scale-98"
+              className="w-full inline-flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-white text-[11px] sm:text-xs font-bold shadow-2xs transition hover:opacity-95 active:scale-98 whitespace-nowrap"
               style={{ backgroundColor: primaryColor }}
             >
               {isKg ? <Scale className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}

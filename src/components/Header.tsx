@@ -47,7 +47,7 @@ export function Header({
     : 'Retirada ou Entrega'
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-2xs">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-2xs">
       {/* 1. Barra Superior de Utilidades (Estilo Oba) */}
       <div
         className="text-white text-[11px] font-medium py-1.5 px-4 sm:px-6 lg:px-8 xl:px-12 transition-colors"
@@ -62,8 +62,8 @@ export function Header({
           </div>
 
           <div className="hidden md:flex items-center gap-4 text-white/90">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-pulse" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/15">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-light animate-pulse" />
               Loja Aberta • Peça Online
             </span>
             {(store.whatsapp || store.phone) && (
@@ -103,11 +103,11 @@ export function Header({
 
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white truncate">
+                <span className="text-base sm:text-xl font-black tracking-tight text-brand-charcoal dark:text-white truncate">
                   {store.name}
                 </span>
               </div>
-              <span className="inline-block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <span className="inline-block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-brand-primary dark:text-brand-light">
                 Hortifruti & Mercado Fresco
               </span>
             </div>
@@ -118,7 +118,7 @@ export function Header({
             <div
               className={`relative flex items-center w-full transition-all rounded-full bg-slate-100/90 dark:bg-slate-800/90 border ${
                 isSearchFocused
-                  ? 'border-emerald-600 shadow-lg ring-2 ring-emerald-500/20 bg-white dark:bg-slate-900'
+                  ? 'border-brand-primary shadow-lg ring-2 ring-brand-primary/20 bg-white dark:bg-brand-charcoal'
                   : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
               }`}
             >
@@ -149,10 +149,10 @@ export function Header({
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Indicador de Entrega / Região */}
             <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/60 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-left">
-              <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
+              <MapPin className="h-4 w-4 text-brand-primary dark:text-brand-light shrink-0" />
               <div className="text-[11px] leading-tight">
                 <span className="block text-slate-400 text-[9px] uppercase font-bold">Entregar em:</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[130px] block">
+                <span className="font-semibold text-brand-charcoal dark:text-slate-200 truncate max-w-[130px] block">
                   {cityDisplay}
                 </span>
               </div>
@@ -165,7 +165,7 @@ export function Header({
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition shadow-2xs"
               title="Acompanhar pedidos em tempo real"
             >
-              <Clock className="h-4 w-4 text-emerald-600" />
+              <Clock className="h-4 w-4 text-brand-primary dark:text-brand-light" />
               <span className="hidden sm:inline">Meus Pedidos</span>
             </button>
 
@@ -189,7 +189,7 @@ export function Header({
               <div className="relative">
                 <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2.5 h-4 w-4 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-xs">
+                  <span className="absolute -top-2 -right-2.5 h-4 w-4 rounded-full bg-brand-craft text-brand-charcoal text-[10px] font-black flex items-center justify-center shadow-xs">
                     {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}

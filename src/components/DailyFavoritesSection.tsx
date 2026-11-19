@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ChevronLeft, ChevronRight, Heart, Sparkles, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { PortalCartItem, PortalProduct } from '../types/portal.types'
 import { ProductCard } from './ProductCard'
 
@@ -39,30 +39,28 @@ export function DailyFavoritesSection({
   if (favoriteProducts.length === 0) return null
 
   return (
-    <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs space-y-4">
+    <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-6 shadow-2xs space-y-4">
       {/* Cabeçalho */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
-            <Heart className="h-4 w-4 fill-white" />
-          </div>
+        <div className="flex items-center gap-3">
+          <span className="h-6 w-1 rounded-full bg-brand-craft shrink-0" aria-hidden="true" />
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-brand-charcoal dark:text-white tracking-tight">
                 Favoritos do Dia a Dia
               </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-700 dark:text-amber-400">
-                <Star className="h-3 w-3 fill-amber-500" /> Mais Pedidos
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                Mais pedidos
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Os itens essenciais que não podem faltar na sua fruteira e despensa:
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Os itens essenciais para a sua fruteira e despensa
             </p>
           </div>
         </div>
 
         {/* Setas de rolagem */}
-        <div className="flex items-center gap-1.5">
+        <div className="hidden md:flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => handleScroll('left')}
@@ -82,10 +80,10 @@ export function DailyFavoritesSection({
         </div>
       </div>
 
-      {/* Slider Horizontal de Produtos Favoritos */}
+      {/* Grade 2 em 2 no Mobile + Slider Horizontal no Desktop */}
       <div
         ref={scrollRef}
-        className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar scroll-smooth snap-x snap-mandatory"
+        className="grid grid-cols-2 gap-2.5 sm:gap-3 md:flex md:items-stretch md:gap-4 md:overflow-x-auto md:pb-3 md:pt-1 no-scrollbar scroll-smooth md:snap-x md:snap-mandatory"
       >
         {favoriteProducts.map((product) => {
           const cartItem = cart.find((c) => c.product.id === product.id)
@@ -93,7 +91,7 @@ export function DailyFavoritesSection({
           return (
             <div
               key={product.id}
-              className="w-[190px] sm:w-[210px] md:w-[220px] lg:w-[230px] shrink-0 snap-start flex flex-col"
+              className="min-w-0 md:w-[220px] lg:w-[230px] md:shrink-0 md:snap-start flex flex-col"
             >
               <ProductCard
                 product={product}

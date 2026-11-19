@@ -13,7 +13,7 @@ export function CredentialErrorScreen({ status, onRetry }: CredentialErrorScreen
   const isRevoked = status.code === 'REVOKED'
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-brand-charcoal text-slate-100 p-6">
       <div className="max-w-md w-full rounded-2xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl space-y-6 text-center">
         <div className="mx-auto h-16 w-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
           {isExpired ? (
@@ -59,7 +59,7 @@ export function CredentialErrorScreen({ status, onRetry }: CredentialErrorScreen
           <button
             type="button"
             onClick={onRetry}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-3 px-4 transition"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary hover:opacity-95 text-white font-semibold text-xs py-3 px-4 transition"
           >
             <RefreshCw className="h-4 w-4" />
             Verificar Credencial Novamente

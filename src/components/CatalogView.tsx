@@ -33,7 +33,7 @@ import { CartDrawer } from './CartDrawer'
 import { RecentOrdersModal } from './RecentOrdersModal'
 import { WeightSelectorModal } from './WeightSelectorModal'
 import { CookieConsentBanner } from './CookieConsentBanner'
-import { ArrowLeft, RotateCcw, Sparkles } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 interface CatalogViewProps {
   store: PortalStore
@@ -96,8 +96,11 @@ export function CatalogView({
     getPortalOrderHistory(store.id)
   )
 
+  const configuredPrimary = store.theme_config?.primaryColor
   const primaryColor =
-    store.theme_config?.primaryColor || portalConfig.branding.primaryColor || '#16a34a'
+    configuredPrimary && configuredPrimary.toLowerCase() !== '#16a34a'
+      ? configuredPrimary
+      : portalConfig.branding.primaryColor || '#2E7D32'
 
   const offersRef = React.useRef<HTMLDivElement>(null)
 
@@ -379,7 +382,7 @@ export function CatalogView({
   const activeCategoryObj = categories.find((c) => c.id === selectedCategory)
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-600 selection:text-white">
+    <div className="min-h-screen bg-neutral-50 dark:bg-brand-charcoal text-brand-charcoal dark:text-slate-100 flex flex-col selection:bg-brand-primary selection:text-white">
       {/* 1. Header E-commerce Estilo Oba com busca ampla e sacola */}
       <Header
         store={store}
@@ -458,10 +461,10 @@ export function CatalogView({
             />
 
             {/* Vitrines Individuais por Categoria */}
-            <div className="space-y-8 pt-2">
-              <div className="flex items-center gap-2 px-1">
-                <Sparkles className="h-5 w-5 text-emerald-600" />
-                <h2 className="text-base sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
+            <div className="space-y-6 pt-2">
+              <div className="flex items-center gap-2.5 px-0.5">
+                <span className="h-5 w-1 rounded-full bg-brand-primary shrink-0" aria-hidden="true" />
+                <h2 className="text-base sm:text-xl font-bold text-brand-charcoal dark:text-white tracking-tight">
                   Vitrines por Departamento
                 </h2>
               </div>
@@ -497,7 +500,7 @@ export function CatalogView({
               <button
                 type="button"
                 onClick={handleClearFilters}
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-brand-primary dark:text-brand-light hover:underline"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Voltar à vitrine principal</span>
@@ -505,12 +508,12 @@ export function CatalogView({
 
               <div className="flex items-center gap-2">
                 {activeCategoryObj && (
-                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
+                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-brand-primary/10 text-brand-primary dark:text-brand-light border border-brand-primary/30">
                     Categoria: {activeCategoryObj.name}
                   </span>
                 )}
                 {search && (
-                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/30">
+                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-brand-craft/15 text-brand-charcoal dark:text-brand-craft border border-brand-craft/30">
                     Busca: &quot;{search}&quot;
                   </span>
                 )}
@@ -546,7 +549,7 @@ export function CatalogView({
       </main>
 
       {/* 4. Rodapé Limpo */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-8 text-center text-xs text-slate-500 mt-12">
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-brand-charcoal py-8 text-center text-xs text-slate-500 dark:text-slate-400 mt-12">
         <div className="max-w-[1536px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>
             © {new Date().getFullYear()} <strong>{store.name}</strong> • Catálogo Online e Rastreamento de Pedidos em Tempo Real.

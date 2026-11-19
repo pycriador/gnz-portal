@@ -95,9 +95,9 @@ export function App() {
 
   if (bootstrapping) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 space-y-3">
-        <div className="h-10 w-10 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-        <p className="text-xs font-medium text-slate-500">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 dark:bg-brand-charcoal p-6 space-y-3">
+        <div className="h-10 w-10 rounded-full border-4 border-brand-primary dark:border-brand-light border-t-transparent animate-spin" />
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
           Validando credencial exclusiva da loja e carregando vitrine...
         </p>
       </div>

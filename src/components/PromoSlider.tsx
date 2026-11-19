@@ -3,12 +3,8 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Flame,
-  Leaf,
   Pause,
   Play,
-  Sparkles,
-  Tag,
 } from 'lucide-react'
 
 interface PromoSlide {
@@ -34,8 +30,8 @@ const PROMO_SLIDES: PromoSlide[] = [
     highlightTag: 'Até 30% OFF',
     imageUrl:
       'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80',
-    gradient: 'from-emerald-950/95 via-slate-950/85 to-transparent',
-    accentColor: '#16a34a',
+    gradient: 'from-brand-charcoal/95 via-brand-charcoal/80 to-transparent',
+    accentColor: '#2E7D32',
     ctaText: 'Aproveitar a Feira',
   },
   {
@@ -47,8 +43,8 @@ const PROMO_SLIDES: PromoSlide[] = [
     highlightTag: 'Seleção do Dia',
     imageUrl:
       'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=1600&q=80',
-    gradient: 'from-rose-950/95 via-slate-950/85 to-transparent',
-    accentColor: '#e11d48',
+    gradient: 'from-brand-charcoal/95 via-brand-charcoal/80 to-transparent',
+    accentColor: '#2E7D32',
     ctaText: 'Ver Frutas Selecionadas',
     targetCategory: 'Frutas',
   },
@@ -61,8 +57,8 @@ const PROMO_SLIDES: PromoSlide[] = [
     highlightTag: 'Campo para a Mesa',
     imageUrl:
       'https://images.unsplash.com/photo-1597362925123-77861d3fbac7?auto=format&fit=crop&w=1600&q=80',
-    gradient: 'from-green-950/95 via-slate-950/85 to-transparent',
-    accentColor: '#15803d',
+    gradient: 'from-brand-charcoal/95 via-brand-primary/50 to-transparent',
+    accentColor: '#2E7D32',
     ctaText: 'Ver Verduras & Legumes',
     targetCategory: 'Verduras e Legumes',
   },
@@ -75,8 +71,8 @@ const PROMO_SLIDES: PromoSlide[] = [
     highlightTag: 'Higienizados & Prontos',
     imageUrl:
       'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1600&q=80',
-    gradient: 'from-teal-950/95 via-slate-950/85 to-transparent',
-    accentColor: '#0d9488',
+    gradient: 'from-brand-charcoal/95 via-brand-charcoal/80 to-transparent',
+    accentColor: '#2E7D32',
     ctaText: 'Conferir Folhas & Saladas',
     targetCategory: 'Seleção Praticidade',
   },
@@ -89,8 +85,8 @@ const PROMO_SLIDES: PromoSlide[] = [
     highlightTag: 'Shimeji & Paris',
     imageUrl:
       'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1600&q=80',
-    gradient: 'from-amber-950/95 via-slate-950/85 to-transparent',
-    accentColor: '#d97706',
+    gradient: 'from-brand-charcoal/95 via-brand-charcoal/85 to-transparent',
+    accentColor: '#2E7D32',
     ctaText: 'Ver Cogumelos & Especiais',
     targetCategory: 'Cogumelos',
   },
@@ -139,7 +135,7 @@ export function PromoSlider({
 
   return (
     <div
-      className="relative rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 dark:border-slate-800 bg-slate-950"
+      className="relative rounded-2xl overflow-hidden shadow-md border border-slate-200/80 dark:border-slate-800 bg-brand-charcoal"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -163,36 +159,33 @@ export function PromoSlider({
         ))}
 
         {/* Conteúdo do Slide */}
-        <div className="relative z-20 h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 py-8 max-w-3xl text-white space-y-3.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-white/20 backdrop-blur-md text-amber-300 border border-white/10 shadow-xs">
-              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-              <span>{slide.badge}</span>
+        <div className="relative z-20 h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 py-8 max-w-2xl text-white space-y-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wide bg-brand-craft text-brand-charcoal">
+              {slide.highlightTag}
             </span>
-
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500 text-slate-950 shadow-2xs">
-              <Flame className="h-3 w-3 fill-slate-950" />
-              <span>{slide.highlightTag}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-200/90">
+              {slide.badge}
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight text-white drop-shadow-md">
+          <h2 className="text-xl sm:text-3xl md:text-[34px] font-extrabold tracking-tight leading-[1.15] text-white">
             {slide.title}
           </h2>
 
-          <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed max-w-xl drop-shadow-xs line-clamp-2 sm:line-clamp-none">
+          <p className="text-xs sm:text-sm text-slate-200/90 font-normal leading-relaxed max-w-lg line-clamp-2 sm:line-clamp-none">
             {slide.subtitle}
           </p>
 
-          <div className="pt-2">
+          <div className="pt-1.5">
             <button
               type="button"
               onClick={handleCtaClick}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-black text-white shadow-md transition-all hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white shadow-sm transition hover:opacity-95 active:scale-[0.98]"
               style={{ backgroundColor: slide.accentColor || primaryColor }}
             >
               <span>{slide.ctaText}</span>
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -225,7 +218,7 @@ export function PromoSlider({
               onClick={() => setCurrentIdx(idx)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 idx === currentIdx
-                  ? 'w-8 bg-amber-400 shadow-xs'
+                  ? 'w-8 bg-brand-craft shadow-xs'
                   : 'w-2 bg-white/40 hover:bg-white/80'
               }`}
               title={`Ir para ${s.title}`}

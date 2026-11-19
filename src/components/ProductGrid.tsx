@@ -3,11 +3,9 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Package,
   RotateCcw,
   Scale,
-  Sparkles,
 } from 'lucide-react'
 import type { PortalCartItem, PortalProduct } from '../types/portal.types'
 import { ProductCard } from './ProductCard'
@@ -58,14 +56,13 @@ export function ProductGrid({
       {/* 1. Barra de Controles e Ordenação no Topo da Vitrine */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-emerald-600" />
-          <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+          <span className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200">
             {loading ? (
-              'Carregando produtos frescos...'
+              'Carregando produtos...'
             ) : (
               <>
-                Exibindo <strong className="text-emerald-600 dark:text-emerald-400">{products.length}</strong> de{' '}
-                <strong>{totalProducts}</strong> itens
+                Exibindo <strong className="text-brand-primary dark:text-brand-light">{products.length}</strong> de{' '}
+                <strong>{totalProducts}</strong> produtos
               </>
             )}
           </span>
@@ -83,7 +80,7 @@ export function ProductGrid({
             onClick={onToggleOnlyKg}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition border ${
               onlyKg
-                ? 'bg-amber-500 text-white border-amber-600 shadow-2xs'
+                ? 'bg-brand-craft text-brand-charcoal border-brand-craft shadow-2xs'
                 : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
@@ -122,7 +119,7 @@ export function ProductGrid({
 
       {/* 2. Grid de Produtos Amplo (2 colunas mobile até 6 colunas em telas grandes) */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-4 lg:gap-5">
           {Array.from({ length: 12 }).map((_, idx) => (
             <div
               key={idx}
@@ -161,7 +158,7 @@ export function ProductGrid({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-4 lg:gap-5">
           {products.map((product) => {
             const cartItem = cart.find((c) => c.product.id === product.id)
             return (

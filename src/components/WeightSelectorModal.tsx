@@ -33,16 +33,16 @@ export function WeightSelectorModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-brand-charcoal border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-brand-craft/15 text-brand-craft flex items-center justify-center">
               <Scale className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{product.name}</h3>
+              <h3 className="text-sm font-bold text-brand-charcoal dark:text-white">{product.name}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Preço por quilo: <strong className="text-emerald-600">{formatCurrency(product.selling_price)}/kg</strong>
+                Preço por quilo: <strong className="text-brand-primary dark:text-brand-light">{formatCurrency(product.selling_price)}/kg</strong>
               </p>
             </div>
           </div>
@@ -70,8 +70,8 @@ export function WeightSelectorModal({
                     onClick={() => setGrams(preset)}
                     className={`py-2 px-2 rounded-xl text-xs font-semibold border transition ${
                       active
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                        : 'bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-emerald-500/50'
+                        ? 'bg-brand-primary text-white border-brand-primary shadow-xs'
+                        : 'bg-slate-50 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-primary/50'
                     }`}
                   >
                     {preset >= 1000 ? `${preset / 1000}kg` : `${preset}g`}
@@ -91,20 +91,20 @@ export function WeightSelectorModal({
               step={50}
               value={grams}
               onChange={(e) => setGrams(Math.max(10, Number(e.target.value || 0)))}
-              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
             />
           </div>
 
-          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/25 p-3.5 flex items-center justify-between">
+          <div className="rounded-xl bg-brand-primary/10 border border-brand-primary/25 p-3.5 flex items-center justify-between">
             <div>
-              <span className="block text-[11px] uppercase tracking-wider font-semibold text-emerald-700 dark:text-emerald-300">
+              <span className="block text-[11px] uppercase tracking-wider font-semibold text-brand-primary dark:text-brand-light">
                 Peso Selecionado: {formatProductWeight(weightInKg)}
               </span>
               <span className="text-xs text-slate-600 dark:text-slate-400">
                 Valor proporcional calculado automaticamente
               </span>
             </div>
-            <span className="text-lg font-extrabold text-emerald-700 dark:text-emerald-300">
+            <span className="text-lg font-extrabold text-brand-primary dark:text-brand-light">
               {formatCurrency(estimatedPrice)}
             </span>
           </div>
@@ -121,7 +121,7 @@ export function WeightSelectorModal({
           <button
             type="button"
             onClick={() => onConfirm(weightInKg)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-primary hover:opacity-95 text-white shadow-xs transition"
           >
             <Check className="h-4 w-4" />
             Confirmar Peso ({formatProductWeight(weightInKg)})

@@ -13,7 +13,6 @@ import {
   Phone,
   RefreshCw,
   ShoppingBag,
-  Sparkles,
   Store as StoreIcon,
   Truck,
   User,
@@ -146,7 +145,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
       status: 'COMPLETED',
       label: statusLabels.COMPLETED,
       subtitle: 'Pedido concluído e finalizado com sucesso!',
-      icon: Sparkles,
+      icon: CheckCircle2,
     })
 
     return list
@@ -197,9 +196,9 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-3 bg-slate-50 dark:bg-slate-950">
-        <div className="h-10 w-10 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin" />
-        <p className="text-xs font-medium text-slate-500">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 space-y-3 bg-neutral-50 dark:bg-brand-charcoal">
+        <div className="h-10 w-10 rounded-full border-4 border-brand-primary dark:border-brand-light border-t-transparent animate-spin" />
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
           Conectando ao rastreamento em tempo real do pedido...
         </p>
       </div>
@@ -208,9 +207,9 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
 
   if (!order) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-4 bg-slate-50 dark:bg-slate-950">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-4 bg-neutral-50 dark:bg-brand-charcoal">
         <ShoppingBag className="h-12 w-12 text-slate-400" />
-        <h1 className="text-lg font-bold text-slate-900 dark:text-white">
+        <h1 className="text-lg font-bold text-brand-charcoal dark:text-white">
           Pedido não localizado nesta loja
         </h1>
         <p className="text-xs text-slate-500 max-w-sm">
@@ -219,7 +218,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
         <button
           type="button"
           onClick={onBackToCatalog}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-primary text-white text-xs font-semibold hover:opacity-95 transition"
         >
           <ArrowLeft className="h-4 w-4" />
           Voltar para a Vitrine
@@ -232,8 +231,8 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
   const isCancelled = order.status === 'CANCELLED'
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-14">
-      <header className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md">
+    <div className="min-h-screen bg-neutral-50 dark:bg-brand-charcoal text-brand-charcoal dark:text-slate-100 pb-14">
+      <header className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             {store?.logo_url ? (
@@ -243,7 +242,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
                 className="h-10 w-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
               />
             ) : (
-              <div className="h-10 w-10 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-brand-primary/10 text-brand-primary dark:text-brand-light flex items-center justify-center">
                 <StoreIcon className="h-5 w-5" />
               </div>
             )}
@@ -252,7 +251,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
               <p className="text-[11px] text-slate-500 flex items-center gap-1.5">
                 {!isCompleted && !isCancelled ? (
                   <>
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="h-2 w-2 rounded-full bg-brand-light animate-pulse" />
                     Atualização em tempo real ativa
                   </>
                 ) : (
@@ -274,7 +273,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
             <button
               type="button"
               onClick={onBackToCatalog}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-charcoal dark:bg-white text-white dark:text-brand-charcoal text-xs font-semibold"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Vitrine
@@ -289,16 +288,16 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
+                <span className="text-xs font-bold uppercase tracking-wider text-brand-primary dark:text-brand-light">
                   Pedido #{order.order_number}
                 </span>
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                     isCompleted
-                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                      ? 'bg-brand-primary/15 text-brand-primary dark:text-brand-light'
                       : isCancelled
                       ? 'bg-red-500/15 text-red-600 dark:text-red-300'
-                      : 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                      : 'bg-brand-craft/15 text-brand-charcoal dark:text-brand-craft'
                   }`}
                 >
                   {statusLabels[order.status] || order.status}
@@ -314,7 +313,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
               <span className="text-[11px] uppercase tracking-wider text-slate-400 block">
                 Total do Pedido
               </span>
-              <span className="text-xl font-black text-emerald-600">
+              <span className="text-xl font-black text-brand-primary dark:text-brand-light">
                 {formatCurrency(order.total_amount)}
               </span>
             </div>
@@ -345,7 +344,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
                     key={step.status}
                     className={`flex items-start gap-3.5 p-3 rounded-xl border transition ${
                       isCurrent
-                        ? 'border-emerald-500/50 bg-emerald-500/10'
+                        ? 'border-brand-primary/50 bg-brand-primary/10'
                         : isDone
                         ? 'border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40'
                         : 'border-transparent opacity-50'
@@ -354,7 +353,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
                     <div
                       className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
                         isDone || isCurrent
-                          ? 'bg-emerald-600 text-white'
+                          ? 'bg-brand-primary text-white'
                           : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
                       }`}
                     >
@@ -364,7 +363,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold">{step.label}</span>
                         {isCurrent && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-600 text-white">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-primary text-white">
                             Etapa Atual
                           </span>
                         )}
@@ -386,13 +385,13 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
               onClick={handleCopyLink}
               className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+              {copied ? <Check className="h-4 w-4 text-brand-primary dark:text-brand-light" /> : <Copy className="h-4 w-4" />}
               {copied ? 'Link Copiado!' : 'Copiar Link de Rastreio'}
             </button>
             <button
               type="button"
               onClick={handleOpenWhatsApp}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs"
+              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-brand-primary hover:opacity-95 text-white text-xs font-semibold shadow-xs transition"
             >
               <MessageCircle className="h-4 w-4" />
               Enviar / Falar no WhatsApp da Loja

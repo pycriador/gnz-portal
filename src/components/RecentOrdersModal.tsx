@@ -50,12 +50,12 @@ export function RecentOrdersModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-brand-charcoal border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Cabeçalho */}
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Clock className="h-5 w-5 text-emerald-600" />
-            <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+            <Clock className="h-5 w-5 text-brand-primary dark:text-brand-light" />
+            <h2 className="text-sm sm:text-base font-extrabold text-brand-charcoal dark:text-white">
               Meus Pedidos Recentes
             </h2>
           </div>
@@ -86,7 +86,7 @@ export function RecentOrdersModal({
                     setErrorMsg('')
                   }}
                   placeholder="Ex.: 1024 ou UUID do pedido..."
-                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 />
               </div>
               <button
@@ -121,15 +121,15 @@ export function RecentOrdersModal({
                 {orders.map((ord) => (
                   <div
                     key={ord.id}
-                    className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 flex items-center justify-between gap-3 hover:border-emerald-500/40 transition"
+                    className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 flex items-center justify-between gap-3 hover:border-brand-primary/40 transition"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-extrabold text-slate-900 dark:text-white">
+                        <span className="text-xs font-extrabold text-brand-charcoal dark:text-white">
                           Pedido #{ord.orderNumber}
                         </span>
                         <span className="text-slate-300 dark:text-slate-700">•</span>
-                        <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                        <span className="text-xs font-black text-brand-primary dark:text-brand-light">
                           {formatCurrency(ord.totalAmount)}
                         </span>
                       </div>
@@ -144,7 +144,7 @@ export function RecentOrdersModal({
                         onOpenOrderTracking(ord.id)
                         onClose()
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 transition shadow-2xs shrink-0"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-brand-primary hover:text-white hover:border-brand-primary transition shadow-2xs shrink-0"
                     >
                       <span>Rastrear</span>
                       <ExternalLink className="h-3 w-3" />

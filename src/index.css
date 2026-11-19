@@ -3,6 +3,32 @@
 @tailwind utilities;
 
 :root {
-  --portal-primary: #16a34a;
-  --portal-accent: #f59e0b;
+  color-scheme: light;
+  --portal-primary: #2e7d32;
+  --portal-primary-rgb: 46 125 50;
+  --portal-green-light: #81c784;
+  --portal-green-light-rgb: 129 199 132;
+  --portal-charcoal: #111827;
+  --portal-charcoal-rgb: 17 24 39;
+  --portal-accent: #b68652;
+  --portal-craft: #b68652;
+  --portal-craft-rgb: 182 134 82;
+  --portal-straw: #d8c6a3;
+  --portal-straw-rgb: 216 198 163;
+  accent-color: var(--portal-primary);
+}
+
+:root.dark {
+  color-scheme: dark;
+  accent-color: var(--portal-green-light);
+}
+
+@media (forced-colors: active) {
+  :root {
+    --portal-primary: Highlight;
+    --portal-green-light: Highlight;
+    --portal-charcoal: CanvasText;
+    --portal-accent: Highlight;
+    --portal-craft: Highlight;
+  }
 }

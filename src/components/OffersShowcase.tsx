@@ -3,10 +3,7 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Flame,
-  Percent,
-  Sparkles,
-  Zap,
+  Tag,
 } from 'lucide-react'
 import type { PortalCartItem, PortalProduct } from '../types/portal.types'
 import { ProductCard } from './ProductCard'
@@ -45,30 +42,30 @@ export function OffersShowcase({
   if (offerProducts.length === 0) return null
 
   return (
-    <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs space-y-4">
+    <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-6 shadow-2xs space-y-5">
       {/* Cabeçalho da Seção */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xs">
-            <Flame className="h-5 w-5 fill-white" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-brand-craft/15 text-brand-craft flex items-center justify-center">
+            <Tag className="h-4 w-4" aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-brand-charcoal dark:text-white tracking-tight">
                 Ofertas da Semana
               </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/15 text-rose-700 dark:text-rose-400">
-                <Percent className="h-3 w-3" /> Preços Especiais
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-brand-craft/15 text-brand-charcoal dark:text-brand-craft">
+                Preços Especiais
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Economize nos itens mais frescos selecionados diretamente para você:
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Itens selecionados com condições especiais para esta semana
             </p>
           </div>
         </div>
 
         {/* Controles de Navegação do Carrossel */}
-        <div className="hidden sm:flex items-center gap-1.5">
+        <div className="hidden md:flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => handleScroll('left')}
@@ -90,57 +87,48 @@ export function OffersShowcase({
 
       {/* Grid Principal: Imagem Preparada à Esquerda + Slider de Produtos à Direita (Padrão Oba) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-stretch">
-        {/* 1. Card / Imagem Preparada Bonita à Esquerda */}
-        <div className="lg:col-span-4 rounded-3xl overflow-hidden relative shadow-md flex flex-col justify-between p-6 sm:p-7 min-h-[360px] lg:min-h-full bg-gradient-to-br from-rose-950 via-slate-950 to-amber-950 text-white border border-rose-900/40">
+        {/* 1. Card Editorial de Ofertas à Esquerda */}
+        <div className="lg:col-span-4 rounded-2xl overflow-hidden relative shadow-sm flex flex-col justify-between p-6 sm:p-7 min-h-[320px] lg:min-h-full bg-brand-charcoal text-white border border-slate-800">
           <img
             src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80"
             alt="Ofertas Hortifruti"
-            className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-overlay"
+            className="absolute inset-0 w-full h-full object-cover opacity-30"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal via-brand-charcoal/70 to-brand-charcoal/40" />
 
-          <div className="relative z-10 space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-500 text-white shadow-xs">
-              <Zap className="h-3.5 w-3.5 fill-white" />
-              <span>OFERTAS IMBATÍVEIS</span>
+          <div className="relative z-10 space-y-2.5">
+            <span className="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider bg-brand-craft text-brand-charcoal">
+              Seleção da Semana
             </span>
 
-            <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-snug drop-shadow-sm">
-              Qualidade Gourmet com Preço de Feira
+            <h3 className="text-2xl sm:text-[26px] font-extrabold tracking-tight leading-snug">
+              Qualidade de feira com preços especiais
             </h3>
 
-            <p className="text-xs text-rose-100/90 leading-relaxed font-medium">
-              Aproveite os descontos exclusivos da semana em frutas selecionadas, morangos, melões e legumes colhidos no ponto certo.
+            <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed">
+              Frutas, verduras e legumes colhidos no ponto certo com estoque atualizado em tempo real.
             </p>
           </div>
 
           <div className="relative z-10 pt-6">
-            <div className="p-3.5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 space-y-1.5 mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300 block">
-                Vantagem Exclusiva
-              </span>
-              <p className="text-xs font-semibold text-slate-200">
-                Baixa imediata no estoque e pesagem conferida para você não pagar nada a mais.
-              </p>
-            </div>
-
             {onViewAllOffers && (
               <button
                 type="button"
                 onClick={onViewAllOffers}
-                className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-white text-slate-950 text-xs font-black shadow-md hover:bg-rose-50 transition active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white text-brand-charcoal text-xs font-bold shadow-sm hover:bg-neutral-100 transition active:scale-[0.98]"
               >
-                <span>Explorar Todas as Ofertas</span>
-                <ArrowRight className="h-4 w-4" />
+                <span>Ver todas as ofertas</span>
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
           </div>
         </div>
 
-        {/* 2. Slider Horizontal de Produtos à Direita */}
+        {/* 2. Grade 2 em 2 no Mobile + Slider Horizontal no Desktop */}
         <div className="lg:col-span-8 flex flex-col justify-center min-w-0">
           <div
             ref={scrollRef}
-            className="flex items-stretch gap-3 sm:gap-4 overflow-x-auto pb-3 pt-1 no-scrollbar scroll-smooth snap-x snap-mandatory"
+            className="grid grid-cols-2 gap-2.5 sm:gap-3 md:flex md:items-stretch md:gap-4 md:overflow-x-auto md:pb-3 md:pt-1 no-scrollbar scroll-smooth md:snap-x md:snap-mandatory"
           >
             {offerProducts.map((product) => {
               const cartItem = cart.find((c) => c.product.id === product.id)
@@ -148,7 +136,7 @@ export function OffersShowcase({
               return (
                 <div
                   key={product.id}
-                  className="w-[200px] sm:w-[220px] md:w-[230px] shrink-0 snap-start flex flex-col"
+                  className="min-w-0 md:w-[220px] lg:w-[230px] md:shrink-0 md:snap-start flex flex-col"
                 >
                   <ProductCard
                     product={product}

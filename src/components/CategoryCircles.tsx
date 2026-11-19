@@ -3,91 +3,54 @@ import {
   Apple,
   Carrot,
   Clock,
+  Croissant,
+  CupSoda,
   Egg,
   Leaf,
   Salad,
-  Sparkles,
+  Sprout,
+  Wheat,
 } from 'lucide-react'
 import type { PortalCategory } from '../types/portal.types'
 
-interface CategoryTheme {
+interface CategoryVisual {
   icon: React.ReactNode
-  gradient: string
-  borderColor: string
-  textColor: string
-  tagline: string
+  tone: 'green' | 'craft'
 }
 
-function getCategoryTheme(name: string): CategoryTheme {
+function getCategoryVisual(name: string): CategoryVisual {
   const lower = name.toLowerCase()
+  const iconClass = 'h-6 w-6 sm:h-6 sm:w-6 stroke-[1.75]'
 
   if (lower.includes('fruta')) {
-    return {
-      icon: <Apple className="h-6 w-6 sm:h-7 sm:w-7" />,
-      gradient: 'from-rose-500 to-amber-500',
-      borderColor: 'border-rose-200 dark:border-rose-900/60',
-      textColor: 'text-rose-600 dark:text-rose-400',
-      tagline: 'Frescas & Doces',
-    }
+    return { icon: <Apple className={iconClass} aria-hidden="true" />, tone: 'craft' }
   }
-
-  if (lower.includes('verdura') || lower.includes('legume')) {
-    return {
-      icon: <Carrot className="h-6 w-6 sm:h-7 sm:w-7" />,
-      gradient: 'from-emerald-500 to-green-600',
-      borderColor: 'border-emerald-200 dark:border-emerald-900/60',
-      textColor: 'text-emerald-600 dark:text-emerald-400',
-      tagline: 'Colheita do Dia',
-    }
+  if (lower.includes('verdura') || lower.includes('legume') || lower.includes('folha')) {
+    return { icon: <Carrot className={iconClass} aria-hidden="true" />, tone: 'green' }
   }
-
   if (lower.includes('cogumelo')) {
-    return {
-      icon: <Sparkles className="h-6 w-6 sm:h-7 sm:w-7" />,
-      gradient: 'from-amber-600 to-stone-700',
-      borderColor: 'border-amber-200 dark:border-amber-900/60',
-      textColor: 'text-amber-700 dark:text-amber-400',
-      tagline: 'Linha Gourmet',
-    }
+    return { icon: <Sprout className={iconClass} aria-hidden="true" />, tone: 'craft' }
   }
-
-  if (lower.includes('ovo')) {
-    return {
-      icon: <Egg className="h-6 w-6 sm:h-7 sm:w-7" />,
-      gradient: 'from-amber-400 to-orange-500',
-      borderColor: 'border-amber-200 dark:border-amber-900/60',
-      textColor: 'text-amber-600 dark:text-amber-400',
-      tagline: 'Granja & Caipira',
-    }
+  if (lower.includes('ovo') || lower.includes('queijo') || lower.includes('laticinio')) {
+    return { icon: <Egg className={iconClass} aria-hidden="true" />, tone: 'craft' }
   }
-
   if (lower.includes('praticidade') || lower.includes('pronto')) {
-    return {
-      icon: <Clock className="h-6 w-6 sm:h-7 sm:w-7" />,
-      gradient: 'from-cyan-500 to-blue-600',
-      borderColor: 'border-cyan-200 dark:border-cyan-900/60',
-      textColor: 'text-cyan-600 dark:text-cyan-400',
-      tagline: 'Prontos pro Consumo',
-    }
+    return { icon: <Clock className={iconClass} aria-hidden="true" />, tone: 'green' }
   }
-
   if (lower.includes('tempero') || lower.includes('erva')) {
-    return {
-      icon: <Leaf className="h-6 w-6 sm:h-7 sm:w-7" />,
-      gradient: 'from-teal-500 to-emerald-600',
-      borderColor: 'border-teal-200 dark:border-teal-900/60',
-      textColor: 'text-teal-600 dark:text-teal-400',
-      tagline: 'Aromas & Frescor',
-    }
+    return { icon: <Leaf className={iconClass} aria-hidden="true" />, tone: 'green' }
+  }
+  if (lower.includes('mercearia') || lower.includes('grão') || lower.includes('cereal')) {
+    return { icon: <Wheat className={iconClass} aria-hidden="true" />, tone: 'craft' }
+  }
+  if (lower.includes('padaria') || lower.includes('pão')) {
+    return { icon: <Croissant className={iconClass} aria-hidden="true" />, tone: 'craft' }
+  }
+  if (lower.includes('bebida') || lower.includes('suco')) {
+    return { icon: <CupSoda className={iconClass} aria-hidden="true" />, tone: 'green' }
   }
 
-  return {
-    icon: <Salad className="h-6 w-6 sm:h-7 sm:w-7" />,
-    gradient: 'from-emerald-600 to-teal-700',
-    borderColor: 'border-slate-200 dark:border-slate-800',
-    textColor: 'text-emerald-600 dark:text-emerald-400',
-    tagline: 'Hortifruti',
-  }
+  return { icon: <Salad className={iconClass} aria-hidden="true" />, tone: 'green' }
 }
 
 interface CategoryCirclesProps {
@@ -106,14 +69,14 @@ export function CategoryCircles({
   if (categories.length === 0) return null
 
   return (
-    <section className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
-      <div className="flex items-center justify-between mb-4 px-1">
+    <section className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-2xs">
+      <div className="flex items-end justify-between mb-5 px-0.5">
         <div>
-          <h2 className="text-sm sm:text-base font-black text-slate-900 dark:text-white tracking-tight">
-            Navegue por Categorias
+          <h2 className="text-base sm:text-lg font-bold text-brand-charcoal dark:text-white tracking-tight">
+            Compre por departamento
           </h2>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Selecione uma categoria para explorar os produtos frescos:
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Escolha uma categoria para ver os itens disponíveis hoje
           </p>
         </div>
 
@@ -121,50 +84,49 @@ export function CategoryCircles({
           <button
             type="button"
             onClick={() => onSelectCategory('')}
-            className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+            className="text-xs font-semibold text-brand-primary dark:text-brand-light hover:underline"
           >
-            Ver Todas
+            Ver todas
           </button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
         {categories.map((cat) => {
           const isActive = selectedCategory === cat.id
-          const theme = getCategoryTheme(cat.name)
+          const visual = getCategoryVisual(cat.name)
           const count = productCountByCategory[cat.id]
+
+          const iconContainerTone = isActive
+            ? 'bg-brand-primary text-white shadow-xs'
+            : visual.tone === 'craft'
+            ? 'bg-brand-craft/12 text-brand-craft group-hover:bg-brand-craft/20'
+            : 'bg-brand-primary/10 text-brand-primary dark:bg-brand-primary/20 dark:text-brand-light group-hover:bg-brand-primary/15'
 
           return (
             <button
               key={cat.id}
               type="button"
               onClick={() => onSelectCategory(isActive ? '' : cat.id)}
-              className={`group relative p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 flex flex-col items-center text-center ${
+              className={`group p-4 rounded-xl border transition-all duration-200 flex flex-col items-center text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
                 isActive
-                  ? 'border-emerald-600 bg-emerald-500/10 dark:bg-emerald-500/20 shadow-md ring-2 ring-emerald-500/30'
-                  : 'border-slate-200/80 dark:border-slate-800 hover:border-emerald-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:-translate-y-1 hover:shadow-md'
+                  ? 'border-brand-primary bg-brand-primary/5 dark:bg-brand-primary/15 shadow-xs'
+                  : 'border-slate-200/80 dark:border-slate-800 hover:border-brand-primary/40 hover:bg-slate-50/70 dark:hover:bg-slate-800/50'
               }`}
             >
-              {/* Ícone estilizado com gradiente */}
               <div
-                className={`h-14 w-14 sm:h-16 sm:w-16 rounded-2xl flex items-center justify-center text-white shadow-sm transition-transform duration-300 group-hover:scale-108 bg-gradient-to-br ${theme.gradient}`}
+                className={`h-12 w-12 sm:h-14 sm:w-14 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-105 ${iconContainerTone}`}
               >
-                {theme.icon}
+                {visual.icon}
               </div>
 
-              {/* Título e Subtítulo */}
-              <h3 className="mt-3 text-xs sm:text-sm font-black text-slate-900 dark:text-white line-clamp-1">
+              <h3 className="mt-3 text-xs sm:text-sm font-semibold text-brand-charcoal dark:text-white line-clamp-1">
                 {cat.name}
               </h3>
 
-              <span className="text-[10px] font-semibold text-slate-400 mt-0.5 line-clamp-1">
-                {theme.tagline}
-              </span>
-
-              {/* Badge de Contagem se disponível */}
               {typeof count === 'number' && count > 0 && (
-                <span className="mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
-                  {count} itens
+                <span className="mt-0.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                  {count} {count === 1 ? 'item' : 'itens'}
                 </span>
               )}
             </button>

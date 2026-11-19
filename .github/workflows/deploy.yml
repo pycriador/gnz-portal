@@ -45,8 +45,8 @@ jobs:
           VITE_PORTAL_STORE_ID: ${{ secrets.VITE_PORTAL_STORE_ID || vars.VITE_PORTAL_STORE_ID || 'f8fdfd0e-a13a-44a6-ba98-53e61be300db' }}
           VITE_PORTAL_HBAC_TOKEN: ${{ secrets.VITE_PORTAL_HBAC_TOKEN || vars.VITE_PORTAL_HBAC_TOKEN }}
           VITE_PORTAL_STORE_SLUG: ${{ vars.VITE_PORTAL_STORE_SLUG || 'gnz-hortifruti' }}
-          VITE_PORTAL_BRAND_PRIMARY: ${{ vars.VITE_PORTAL_BRAND_PRIMARY || '#16a34a' }}
-          VITE_PORTAL_BRAND_ACCENT: ${{ vars.VITE_PORTAL_BRAND_ACCENT || '#f59e0b' }}
+          VITE_PORTAL_BRAND_PRIMARY: ${{ vars.VITE_PORTAL_BRAND_PRIMARY || '#2E7D32' }}
+          VITE_PORTAL_BRAND_ACCENT: ${{ vars.VITE_PORTAL_BRAND_ACCENT || '#B68652' }}
 
       - name: Upload Artifact para GitHub Pages
         uses: actions/upload-pages-artifact@v3

@@ -6,8 +6,12 @@ export default {
     extend: {
       colors: {
         brand: {
-          primary: 'var(--portal-primary, #16a34a)',
-          accent: 'var(--portal-accent, #f59e0b)',
+          primary: 'rgb(var(--portal-primary-rgb) / <alpha-value>)',
+          light: 'rgb(var(--portal-green-light-rgb) / <alpha-value>)',
+          charcoal: 'rgb(var(--portal-charcoal-rgb) / <alpha-value>)',
+          accent: 'rgb(var(--portal-craft-rgb) / <alpha-value>)',
+          craft: 'rgb(var(--portal-craft-rgb) / <alpha-value>)',
+          straw: 'rgb(var(--portal-straw-rgb) / <alpha-value>)',
         },
       },
     },

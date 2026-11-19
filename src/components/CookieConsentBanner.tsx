@@ -79,7 +79,7 @@ export function CookieConsentBanner({ primaryColor }: CookieConsentBannerProps) 
 
   return (
     <aside aria-label="Consentimento de Cookies" className="fixed bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-md z-50 animate-in slide-in-from-bottom duration-300">
-      <div className="rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 p-5 shadow-2xl text-slate-900 dark:text-white space-y-3.5">
+      <div className="rounded-3xl bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 p-5 shadow-2xl text-brand-charcoal dark:text-white space-y-3.5">
         <div className="flex items-start gap-3">
           <div
             className="h-10 w-10 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-xs"
@@ -91,7 +91,7 @@ export function CookieConsentBanner({ primaryColor }: CookieConsentBannerProps) 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <h3 className="text-xs sm:text-sm font-black tracking-tight">Privacidade & Cookies</h3>
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-brand-primary/15 text-brand-primary dark:text-brand-light">
                 <ShieldCheck className="h-3 w-3" /> LGPD
               </span>
             </div>
