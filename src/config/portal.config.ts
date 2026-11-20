@@ -35,36 +35,57 @@ function readUrlParam(key: string): string | null {
   return params.get(key)
 }
 
+function cleanEnv(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = value.trim().replace(/^["']+|["']+$/g, '').trim()
+  return trimmed || undefined
+}
+
+function cleanSupabaseUrl(value: string | undefined, fallback: string): string {
+  const cleaned = cleanEnv(value)
+  if (!cleaned) return fallback
+  try {
+    const parsed = new URL(cleaned)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return cleaned
+    }
+  } catch {
+    // Falls back to default URL when env value is malformed
+  }
+  return fallback
+}
+
 export const portalConfig: PortalRuntimeConfig = {
-  supabaseUrl:
-    env.VITE_SUPABASE_URL ||
-    'https://mffrafqyjbjitlhjnlai.supabase.co',
+  supabaseUrl: cleanSupabaseUrl(
+    env.VITE_SUPABASE_URL,
+    'https://mffrafqyjbjitlhjnlai.supabase.co'
+  ),
   supabasePublishableKey:
-    env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    cleanEnv(env.VITE_SUPABASE_PUBLISHABLE_KEY) ||
     'sb_publishable_NfhTi2u06ypAJzlqHms5ug_MW_8bLlQ',
   storeId:
-    readUrlParam('storeId') ||
-    env.VITE_PORTAL_STORE_ID ||
+    cleanEnv(readUrlParam('storeId') || undefined) ||
+    cleanEnv(env.VITE_PORTAL_STORE_ID) ||
     gnzPreset.storeId,
   hbacToken:
-    readUrlParam('token') ||
-    env.VITE_PORTAL_HBAC_TOKEN ||
+    cleanEnv(readUrlParam('token') || undefined) ||
+    cleanEnv(env.VITE_PORTAL_HBAC_TOKEN) ||
     'olv_live_de149281982227867223b7bd3398f930',
   storeSlug:
-    env.VITE_PORTAL_STORE_SLUG ||
+    cleanEnv(env.VITE_PORTAL_STORE_SLUG) ||
     gnzPreset.storeSlug,
   branding: {
-    customTitle: env.VITE_PORTAL_CUSTOM_TITLE || gnzPreset.branding.customTitle,
-    heroBadge: env.VITE_PORTAL_HERO_BADGE || gnzPreset.branding.heroBadge,
+    customTitle: cleanEnv(env.VITE_PORTAL_CUSTOM_TITLE) || gnzPreset.branding.customTitle,
+    heroBadge: cleanEnv(env.VITE_PORTAL_HERO_BADGE) || gnzPreset.branding.heroBadge,
     heroSubtitle: gnzPreset.branding.heroSubtitle,
     deliveryBannerText:
-      env.VITE_PORTAL_DELIVERY_INFO || gnzPreset.branding.deliveryBannerText,
+      cleanEnv(env.VITE_PORTAL_DELIVERY_INFO) || gnzPreset.branding.deliveryBannerText,
     primaryColor:
-      env.VITE_PORTAL_BRAND_PRIMARY || gnzPreset.branding.primaryColor,
+      cleanEnv(env.VITE_PORTAL_BRAND_PRIMARY) || gnzPreset.branding.primaryColor,
     accentColor:
-      env.VITE_PORTAL_BRAND_ACCENT || gnzPreset.branding.accentColor,
+      cleanEnv(env.VITE_PORTAL_BRAND_ACCENT) || gnzPreset.branding.accentColor,
     cardStyle:
-      (env.VITE_PORTAL_CARD_STYLE as PortalCardStyle) ||
+      (cleanEnv(env.VITE_PORTAL_CARD_STYLE) as PortalCardStyle) ||
       (gnzPreset.branding.cardStyle as PortalCardStyle) ||
       'modern',
     gridColumnsDesktop: (gnzPreset.branding.gridColumnsDesktop as 3 | 4) || 4,
