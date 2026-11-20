@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/hortifruti/pedidos/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/hortifruti/pedidos/:file([^/]+\\.[^/]+)",
+      "destination": "/:file"
+    },
+    {
+      "source": "/hortifruti/pedidos",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/hortifruti/pedidos/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
