@@ -33,7 +33,9 @@ import { CartDrawer } from './CartDrawer'
 import { RecentOrdersModal } from './RecentOrdersModal'
 import { WeightSelectorModal } from './WeightSelectorModal'
 import { CookieConsentBanner } from './CookieConsentBanner'
-import { ArrowLeft } from 'lucide-react'
+import { PwaInstallPrompt } from './PwaInstallPrompt'
+import { usePwaInstall } from '../hooks/usePwaInstall'
+import { ArrowLeft, Download } from 'lucide-react'
 import gnzLogo from '../assets/gnz-logo.png'
 
 interface CatalogViewProps {
@@ -383,9 +385,10 @@ export function CatalogView({
 
   const isBrowsingAll = !search && !selectedCategory
   const activeCategoryObj = categories.find((c) => c.id === selectedCategory)
+  const { showInstallButton, triggerInstall } = usePwaInstall()
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-brand-charcoal text-brand-charcoal dark:text-slate-100 flex flex-col selection:bg-brand-primary selection:text-white">
+    <div className="min-h-screen bg-neutral-50 dark:bg-brand-charcoal text-brand-charcoal dark:text-slate-100 flex flex-col selection:bg-brand-primary selection:text-white pwa-safe-bottom">
       {/* 1. Header E-commerce Estilo Oba com busca ampla e sacola */}
       <Header
         store={store}
@@ -401,6 +404,8 @@ export function CatalogView({
         isDark={isDark}
         onToggleDark={onToggleDark}
         primaryColor={primaryColor}
+        showInstallButton={showInstallButton}
+        onInstallApp={triggerInstall}
       />
 
       {/* 2. Sub-Header de Departamentos & Categorias */}
@@ -567,6 +572,16 @@ export function CatalogView({
             </p>
           </div>
           <div className="flex items-center gap-4 text-slate-400">
+            {showInstallButton && (
+              <button
+                type="button"
+                onClick={triggerInstall}
+                className="inline-flex items-center gap-1.5 text-brand-primary dark:text-brand-light font-bold hover:underline"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>Instalar Aplicativo (PWA)</span>
+              </button>
+            )}
             <span>Tecnologia de Estoque & Balança ao Vivo</span>
           </div>
         </div>
@@ -612,6 +627,9 @@ export function CatalogView({
         checkoutError={checkoutError}
         primaryColor={primaryColor}
       />
+
+      {/* Sugestão e Modal de Instalação do PWA */}
+      <PwaInstallPrompt primaryColor={primaryColor} />
 
       {/* Banner de Cookies com Gravação Real no Supabase */}
       <CookieConsentBanner primaryColor={primaryColor} />

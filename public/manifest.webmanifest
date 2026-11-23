@@ -1,0 +1,17 @@
+{
+  "name": "GNZ Hortifruti",
+  "short_name": "GNZ Horti",
+  "description": "Catálogo online e pedidos da GNZ Hortifruti",
+  "id": "/hortifruti/pedidos",
+  "start_url": "/hortifruti/pedidos",
+  "scope": "/hortifruti/pedidos",
+  "display": "standalone",
+  "background_color": "#12141A",
+  "theme_color": "#12141A",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/hortifruti/pedidos/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/hortifruti/pedidos/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/hortifruti/pedidos/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

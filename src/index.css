@@ -32,3 +32,27 @@
     --portal-craft: Highlight;
   }
 }
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media all and (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+    user-select: none;
+  }
+
+  input,
+  textarea {
+    user-select: text;
+  }
+}
+
+.pwa-safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pwa-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

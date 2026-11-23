@@ -17,7 +17,28 @@ Portal web independente (SPA) de vitrine e-commerce e rastreamento de pedidos em
 | **Estilização** | Tailwind CSS 3.4 + PostCSS + Autoprefixer | Design system utilitário, responsividade mobile-first e modo escuro (`darkMode: 'class'`) |
 | **Ícones** | Lucide React | Ícones vetoriais padronizados para departamentos, ações e status (sem emojis no menu) |
 | **Backend & Tempo Real** | Supabase JS (`@supabase/supabase-js`) | Consulta de catálogo, registro de pedidos, consentimento LGPD e assinatura Realtime de status |
-| **CI/CD** | GitHub Actions + GitHub Pages | Typecheck (`tsc -b`), build (`vite build`) e publicação automática na branch `main` |
+| **PWA & App Instalável** | Web App Manifest + Service Worker (`sw.js`) | Instalação como aplicativo nativo em Android, iPhone/iOS e Desktop (`display: standalone`) |
+| **CI/CD** | GitHub Actions + GitHub Pages / Vercel | Typecheck (`tsc -b`), build (`vite build`), rewrites `/hortifruti/pedidos` e publicação automática |
+
+---
+
+## 📲 Progressive Web App (PWA) & Ícones de Aplicativo
+
+O portal é configurado como um **Progressive Web App (PWA)** instalável (**GNZ Horti**), operando em subcaminho `/hortifruti/pedidos`:
+
+- **Ícones Oficiais (`public/icons/`):**
+  - `icon-192.png` (`192x192`, `purpose: "any"`) — Favicon e atalho de tela inicial
+  - `icon-512.png` (`512x512`, `purpose: "any"`) — Ícone de alta resolução e splash screen
+  - `icon-maskable-512.png` (`512x512`, `purpose: "maskable"`) — Ícone adaptável para Android (círculo/squircle)
+  - `apple-touch-icon-180.png` (`180x180`) — Ícone nativo para iOS (iPhone / iPad)
+- **Manifesto & Meta Tags (`public/manifest.webmanifest` + `index.html`):**
+  - Configurado com `id`, `start_url` e `scope` em `/hortifruti/pedidos`, `display: "standalone"`, `theme_color: "#12141A"`, `background_color: "#12141A"` e suporte a `apple-mobile-web-app-capable`.
+- **Service Worker (`public/sw.js` & `vercel.json`):**
+  - Registrado em `/hortifruti/pedidos/sw.js` com `scope: '/hortifruti/pedidos'` e cabeçalho `Service-Worker-Allowed: /hortifruti/pedidos` configurado em [`vercel.json`](vercel.json).
+  - **Exclusão estrita de cache para o Supabase:** Requisições ao Supabase (`*.supabase.co`, `/rest/v1/`, `/rpc/`, `/realtime/`, `/auth/`) **jamais** são cacheadas pelo Service Worker, garantindo preços, estoque e rastreamento de pedidos sempre em tempo real.
+- **Fluxo de Instalação (`src/hooks/usePwaInstall.ts` & `src/components/PwaInstallPrompt.tsx`):**
+  - Botão **"Instalar App"** no cabeçalho, rodapé e banner flutuante com captura imediata de `beforeinstallprompt` (Android/Desktop) e modal passo a passo para iPhone/iPad (*Compartilhar $\rightarrow$ Adicionar à Tela de Início*).
+  - Ocultação automática quando o usuário já está utilizando o aplicativo instalado (`display-mode: standalone`).
 
 ---
 

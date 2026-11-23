@@ -1,6 +1,7 @@
 import * as React from 'react'
 import {
   Clock,
+  Download,
   MapPin,
   Moon,
   Phone,
@@ -26,6 +27,8 @@ interface HeaderProps {
   isDark: boolean
   onToggleDark: () => void
   primaryColor: string
+  showInstallButton?: boolean
+  onInstallApp?: () => void
 }
 
 export function Header({
@@ -39,6 +42,8 @@ export function Header({
   isDark,
   onToggleDark,
   primaryColor,
+  showInstallButton = false,
+  onInstallApp,
 }: HeaderProps) {
   const [isSearchFocused, setIsSearchFocused] = React.useState(false)
 
@@ -47,7 +52,7 @@ export function Header({
     : 'Retirada ou Entrega'
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-2xs">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors shadow-2xs pwa-safe-top">
       {/* 1. Barra Superior de Utilidades (Estilo Oba) */}
       <div
         className="text-white text-[11px] font-medium py-1.5 px-4 sm:px-6 lg:px-8 xl:px-12 transition-colors"
@@ -61,8 +66,20 @@ export function Header({
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-4 text-white/90">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/15">
+          <div className="flex items-center gap-3 text-white/90 shrink-0">
+            {showInstallButton && onInstallApp && (
+              <button
+                type="button"
+                onClick={onInstallApp}
+                className="inline-flex md:hidden items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#12141A] text-white border border-white/20 shadow-2xs active:scale-95 transition"
+                title="Instalar aplicativo na tela inicial"
+              >
+                <Download className="h-3 w-3 text-brand-light" />
+                <span>Instalar App</span>
+              </button>
+            )}
+
+            <span className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/15">
               <span className="h-1.5 w-1.5 rounded-full bg-brand-light animate-pulse" />
               Loja Aberta • Peça Online
             </span>
@@ -71,7 +88,7 @@ export function Header({
                 href={`https://wa.me/${(store.whatsapp || store.phone || '').replace(/\D/g, '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] hover:underline"
+                className="hidden md:inline-flex items-center gap-1 text-[11px] hover:underline"
               >
                 <Phone className="h-3 w-3" />
                 <span>Atendimento: {store.whatsapp || store.phone}</span>
@@ -143,6 +160,19 @@ export function Header({
                 </span>
               </div>
             </div>
+
+            {/* Botão Instalar App (oculto automaticamente em display-mode: standalone) */}
+            {showInstallButton && onInstallApp && (
+              <button
+                type="button"
+                onClick={onInstallApp}
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold bg-[#12141A] text-white hover:bg-slate-800 border border-slate-800 dark:border-slate-700 transition shadow-2xs"
+                title="Instalar aplicativo GNZ Horti no dispositivo"
+              >
+                <Download className="h-4 w-4 text-brand-light" />
+                <span>Instalar App</span>
+              </button>
+            )}
 
             {/* Botão Meus Pedidos / Rastreamento */}
             <button

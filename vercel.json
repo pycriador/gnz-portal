@@ -1,8 +1,49 @@
 {
+  "headers": [
+    {
+      "source": "/hortifruti/pedidos/sw.js",
+      "headers": [
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/hortifruti/pedidos"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/hortifruti/pedidos"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/hortifruti/pedidos/assets/:path*",
       "destination": "/assets/:path*"
+    },
+    {
+      "source": "/hortifruti/pedidos/icons/:path*",
+      "destination": "/icons/:path*"
     },
     {
       "source": "/hortifruti/pedidos/:file([^/]+\\.[^/]+)",

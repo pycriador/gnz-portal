@@ -7,6 +7,7 @@ import {
   Clock,
   Copy,
   CreditCard,
+  Download,
   MapPin,
   MessageCircle,
   Package,
@@ -28,6 +29,8 @@ import {
   getPortalStatusLabels,
   normalizeWhatsAppPhone,
 } from '../utils/portalFormatters'
+import { usePwaInstall } from '../hooks/usePwaInstall'
+import { PwaInstallPrompt } from './PwaInstallPrompt'
 
 interface OrderTrackingViewProps {
   orderId: string
@@ -40,6 +43,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
   const [refreshing, setRefreshing] = React.useState(false)
   const [copied, setCopied] = React.useState(false)
   const [lastPulse, setLastPulse] = React.useState<Date | null>(null)
+  const { showInstallButton, triggerInstall } = usePwaInstall()
 
   const loadOrder = React.useCallback(
     async (silent = false) => {
@@ -231,8 +235,8 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
   const isCancelled = order.status === 'CANCELLED'
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-brand-charcoal text-brand-charcoal dark:text-slate-100 pb-14">
-      <header className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md">
+    <div className="min-h-screen bg-neutral-50 dark:bg-brand-charcoal text-brand-charcoal dark:text-slate-100 pb-14 pwa-safe-bottom">
+      <header className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-brand-charcoal/95 backdrop-blur-md pwa-safe-top">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <span className="inline-flex items-center rounded-lg shrink-0 dark:bg-white/95 dark:px-2 dark:py-0.5">
@@ -258,6 +262,17 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
           </div>
 
           <div className="flex items-center gap-2">
+            {showInstallButton && (
+              <button
+                type="button"
+                onClick={triggerInstall}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#12141A] text-white text-xs font-semibold hover:bg-slate-800"
+                title="Instalar App GNZ Horti"
+              >
+                <Download className="h-3.5 w-3.5 text-brand-light" />
+                <span className="hidden sm:inline">Instalar App</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => loadOrder(true)}
@@ -454,6 +469,7 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
           </div>
         </div>
       </main>
+      <PwaInstallPrompt />
     </div>
   )
 }
