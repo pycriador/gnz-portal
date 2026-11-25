@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gnz-horti-shell-v1'
+const CACHE_NAME = 'gnz-horti-shell-v2'
 
 const PRECACHE_REL_PATHS = [
   './',
