@@ -20,6 +20,9 @@ export type { CouponValidationResult }
 const PUBLIC_PRODUCT_COLUMNS =
   'id, store_id, name, sku, barcode, description, unit, selling_price, is_on_promotion, promotional_price, promo_discount_percent, promo_has_expiration, promo_starts_at, promo_ends_at, promo_label, category_id, is_active, is_published_catalog'
 
+const BASE_PUBLIC_PRODUCT_COLUMNS =
+  'id, store_id, name, sku, barcode, description, unit, selling_price, category_id, is_active, is_published_catalog'
+
 function buildAccentRegex(term: string): string {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return escaped
@@ -252,46 +255,58 @@ export const supabasePortalApi = {
       pageSize = portalConfig.branding.defaultPageSize,
     } = params
 
-    let query = portalSupabase
-      .from('products')
-      .select(
-        `
-        ${PUBLIC_PRODUCT_COLUMNS},
-        categories ( id, name ),
-        product_images ( id, public_url, is_primary, display_order )
-      `,
-        { count: 'exact' }
-      )
-      .eq('store_id', portalConfig.storeId)
-      .eq('is_active', true)
-      .eq('is_published_catalog', true)
-      .is('deleted_at', null)
-
-    if (search && search.trim()) {
-      const cleanTerm = search.trim().replace(/[%,()]/g, ' ')
-      if (cleanTerm) {
-        const pattern = buildAccentRegex(cleanTerm)
-        query = query.or(`name.imatch.${pattern},sku.imatch.${pattern},barcode.imatch.${pattern}`)
-      }
-    }
-
-    if (categoryId) {
-      query = query.eq('category_id', categoryId)
-    }
-    if (typeof minPrice === 'number' && !Number.isNaN(minPrice)) {
-      query = query.gte('selling_price', minPrice)
-    }
-    if (typeof maxPrice === 'number' && !Number.isNaN(maxPrice)) {
-      query = query.lte('selling_price', maxPrice)
-    }
-
     const from = (page - 1) * pageSize
     const to = from + pageSize - 1
 
-    const { data, count, error } = await query
-      .order('name', { ascending: true })
-      .order('id', { ascending: true })
-      .range(from, to)
+    const runProductQuery = (columns: string) => {
+      let q = portalSupabase
+        .from('products')
+        .select(
+          `
+          ${columns},
+          categories ( id, name ),
+          product_images ( id, public_url, is_primary, display_order )
+        `,
+          { count: 'exact' }
+        )
+        .eq('store_id', portalConfig.storeId)
+        .eq('is_active', true)
+        .eq('is_published_catalog', true)
+        .is('deleted_at', null)
+
+      if (search && search.trim()) {
+        const cleanTerm = search.trim().replace(/[%,()]/g, ' ')
+        if (cleanTerm) {
+          const pattern = buildAccentRegex(cleanTerm)
+          q = q.or(`name.imatch.${pattern},sku.imatch.${pattern},barcode.imatch.${pattern}`)
+        }
+      }
+
+      if (categoryId) {
+        q = q.eq('category_id', categoryId)
+      }
+      if (typeof minPrice === 'number' && !Number.isNaN(minPrice)) {
+        q = q.gte('selling_price', minPrice)
+      }
+      if (typeof maxPrice === 'number' && !Number.isNaN(maxPrice)) {
+        q = q.lte('selling_price', maxPrice)
+      }
+
+      return q
+        .order('name', { ascending: true })
+        .order('id', { ascending: true })
+        .range(from, to)
+    }
+
+    let { data, count, error } = await runProductQuery(PUBLIC_PRODUCT_COLUMNS)
+
+    // Fallback transparente caso a migration das colunas promocionais ainda não tenha sido aplicada no banco
+    if (error && (error.code === '42703' || String(error.message || '').includes('does not exist'))) {
+      const fallbackRes = await runProductQuery(BASE_PUBLIC_PRODUCT_COLUMNS)
+      data = fallbackRes.data
+      count = fallbackRes.count
+      error = fallbackRes.error
+    }
 
     if (error) throw error
 
@@ -361,7 +376,7 @@ export const supabasePortalApi = {
     created_at: string
   }> {
     const activeRuntimeStoreId = portalConfig.storeId
-    const { data, error } = await portalSupabase.rpc('create_public_catalog_order', {
+    const baseRpcParams = {
       p_store_id: activeRuntimeStoreId,
       p_customer_name: payload.customerName.trim(),
       p_customer_phone: payload.customerPhone.trim() || null,
@@ -373,8 +388,23 @@ export const supabasePortalApi = {
       })),
       p_payment_method: payload.paymentMethod || 'PIX',
       p_notes: payload.notes?.trim() || null,
+    }
+
+    let { data, error } = await portalSupabase.rpc('create_public_catalog_order', {
+      ...baseRpcParams,
       p_coupon_code: payload.couponCode?.trim().toUpperCase() || null,
     })
+
+    // Fallback caso a RPC no banco ainda não possua o parâmetro p_coupon_code
+    if (
+      error &&
+      !payload.couponCode?.trim() &&
+      (error.code === 'PGRST202' || error.code === '42883')
+    ) {
+      const fallbackRpc = await portalSupabase.rpc('create_public_catalog_order', baseRpcParams)
+      data = fallbackRpc.data
+      error = fallbackRpc.error
+    }
 
     if (error) throw error
     if (!data || !(data as any).id) {
