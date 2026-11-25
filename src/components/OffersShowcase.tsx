@@ -6,6 +6,7 @@ import {
   Tag,
 } from 'lucide-react'
 import type { PortalCartItem, PortalProduct } from '../types/portal.types'
+import { resolveEffectiveProductPrice } from '../utils/portalFormatters'
 import { ProductCard } from './ProductCard'
 
 interface OffersShowcaseProps {
@@ -27,10 +28,14 @@ export function OffersShowcase({
 }: OffersShowcaseProps) {
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
-  // Seleciona os itens de destaque em oferta
+  // Seleciona os itens de destaque em oferta (priorizando produtos com promoção ativa)
   const offerProducts = React.useMemo(() => {
-    // Ordena por menor preço ou seleciona uma fatia atrativa
-    return [...products].slice(0, 10)
+    const activePromos = products.filter((p) => resolveEffectiveProductPrice(p).isPromoActive)
+    if (activePromos.length >= 10) {
+      return activePromos.slice(0, 12)
+    }
+    const nonPromos = products.filter((p) => !resolveEffectiveProductPrice(p).isPromoActive)
+    return [...activePromos, ...nonPromos].slice(0, 10)
   }, [products])
 
   const handleScroll = (direction: 'left' | 'right') => {

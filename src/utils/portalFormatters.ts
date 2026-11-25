@@ -67,6 +67,61 @@ export function formatDateTime(iso?: string | null): string {
   }
 }
 
+export function formatPromoShortDate(iso?: string | null): string {
+  if (!iso) return ''
+  try {
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+    }).format(new Date(iso))
+  } catch {
+    return iso
+  }
+}
+
+export function resolveEffectiveProductPrice(product: {
+  selling_price: number
+  is_on_promotion?: boolean | null
+  promotional_price?: number | null
+  promo_discount_percent?: number | null
+  promo_has_expiration?: boolean | null
+  promo_starts_at?: string | null
+  promo_ends_at?: string | null
+  promo_label?: string | null
+}) {
+  const basePrice = Number(product.selling_price || 0)
+  const promoPrice = Number(product.promotional_price || 0)
+  const now = Date.now()
+  const startsOk =
+    !product.promo_starts_at || new Date(product.promo_starts_at).getTime() <= now
+  const endsOk =
+    !product.promo_has_expiration ||
+    !product.promo_ends_at ||
+    new Date(product.promo_ends_at).getTime() >= now
+  const isPromoActive =
+    Boolean(product.is_on_promotion) &&
+    promoPrice > 0 &&
+    promoPrice < basePrice &&
+    startsOk &&
+    endsOk
+  const effectivePrice = isPromoActive ? promoPrice : basePrice
+  const discountPercent = isPromoActive
+    ? Number(
+        product.promo_discount_percent && product.promo_discount_percent > 0
+          ? product.promo_discount_percent
+          : Math.round(((basePrice - promoPrice) / basePrice) * 100)
+      )
+    : 0
+  return {
+    effectivePrice,
+    originalPrice: basePrice,
+    isPromoActive,
+    discountPercent,
+    promoEndsAt: isPromoActive && product.promo_has_expiration ? product.promo_ends_at : null,
+    promoLabel: isPromoActive ? product.promo_label || 'OFERTA' : null,
+  }
+}
+
 export function isWeighedProduct(product: Pick<PortalProduct, 'unit'>): boolean {
   return (product.unit || '').trim().toUpperCase() === 'KG'
 }
@@ -144,6 +199,9 @@ export function formatPortalWhatsAppOrderMessage(params: {
   notes?: string
   trackingUrl: string
   totalAmount: number
+  subtotalAmount?: number
+  couponCode?: string | null
+  couponDiscountAmount?: number
   createdAt?: string
   items: Array<{
     name: string
@@ -168,20 +226,28 @@ export function formatPortalWhatsAppOrderMessage(params: {
     })
     .join('\n')
 
-  const precos = params.items
-    .map((item) => {
-      const lineTotal = item.quantity * item.unitPrice
-      if (item.isWeighed) {
-        const w = item.weightLabel || formatProductWeight(item.quantity)
-        return `• ${item.name}: ${w} × ${formatCurrency(item.unitPrice)}/kg = ${formatCurrency(
-          lineTotal
-        )}`
-      }
-      return `• ${item.name}: ${item.quantity} un × ${formatCurrency(
-        item.unitPrice
-      )} = ${formatCurrency(lineTotal)}`
-    })
-    .join('\n')
+  const precosLines = params.items.map((item) => {
+    const lineTotal = item.quantity * item.unitPrice
+    if (item.isWeighed) {
+      const w = item.weightLabel || formatProductWeight(item.quantity)
+      return `• ${item.name}: ${w} × ${formatCurrency(item.unitPrice)}/kg = ${formatCurrency(
+        lineTotal
+      )}`
+    }
+    return `• ${item.name}: ${item.quantity} un × ${formatCurrency(
+      item.unitPrice
+    )} = ${formatCurrency(lineTotal)}`
+  })
+
+  if (params.couponCode && params.couponDiscountAmount && params.couponDiscountAmount > 0) {
+    precosLines.push(
+      `• Desconto Cupom (${params.couponCode.toUpperCase()}): -${formatCurrency(
+        params.couponDiscountAmount
+      )}`
+    )
+  }
+
+  const precos = precosLines.join('\n')
 
   const produtosSimples = params.items
     .map((item) => {
@@ -194,6 +260,7 @@ export function formatPortalWhatsAppOrderMessage(params: {
     .join('\n')
 
   const totalFormatted = formatCurrency(params.totalAmount)
+  const subtotalFormatted = formatCurrency(params.subtotalAmount ?? params.totalAmount)
   const dateFormatted = formatDateTime(params.createdAt || new Date().toISOString())
   const paymentLabel = PAYMENT_METHOD_LABELS[params.paymentMethod] || params.paymentMethod
 
@@ -202,7 +269,9 @@ export function formatPortalWhatsAppOrderMessage(params: {
     '{{precos}}': precos,
     '{{produtos_simples}}': produtosSimples,
     '{{total}}': totalFormatted,
-    '{{subtotal}}': totalFormatted,
+    '{{subtotal}}': subtotalFormatted,
+    '{{cupom}}': params.couponCode || 'Nenhum',
+    '{{desconto}}': formatCurrency(params.couponDiscountAmount || 0),
     '{{quantidade_itens}}': `${params.items.length} ${
       params.items.length === 1 ? 'item' : 'itens'
     }`,

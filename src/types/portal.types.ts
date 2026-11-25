@@ -73,12 +73,34 @@ export interface PortalProduct {
   description: string | null
   unit: string
   selling_price: number
+  is_on_promotion?: boolean
+  promotional_price?: number | null
+  promo_discount_percent?: number | null
+  promo_has_expiration?: boolean
+  promo_starts_at?: string | null
+  promo_ends_at?: string | null
+  promo_label?: string | null
   category_id: string | null
   category_name?: string
   is_active: boolean
   is_published_catalog: boolean
   primary_image_url?: string | null
   images: PortalProductImage[]
+}
+
+export interface CouponValidationResult {
+  valid: boolean
+  code: string
+  coupon_id?: string | null
+  discount_type?: 'PERCENTAGE' | 'FIXED_AMOUNT' | null
+  discount_value?: number
+  discount_amount: number
+  subtotal_before_coupon: number
+  eligible_subtotal: number
+  final_total: number
+  first_purchase_only?: boolean
+  is_non_cumulative?: boolean
+  message: string
 }
 
 export interface PortalCartItem {

@@ -1,7 +1,11 @@
 import * as React from 'react'
-import { Scale, X, Check } from 'lucide-react'
+import { Scale, X, Check, Tag } from 'lucide-react'
 import type { PortalProduct } from '../types/portal.types'
-import { formatCurrency, formatProductWeight } from '../utils/portalFormatters'
+import {
+  formatCurrency,
+  formatProductWeight,
+  resolveEffectiveProductPrice,
+} from '../utils/portalFormatters'
 
 interface WeightSelectorModalProps {
   product: PortalProduct | null
@@ -28,8 +32,10 @@ export function WeightSelectorModal({
 
   if (!product) return null
 
+  const { effectivePrice, originalPrice, isPromoActive, discountPercent } =
+    resolveEffectiveProductPrice(product)
   const weightInKg = Math.max(0.05, Number((grams / 1000).toFixed(3)))
-  const estimatedPrice = weightInKg * product.selling_price
+  const estimatedPrice = weightInKg * effectivePrice
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
@@ -40,9 +46,33 @@ export function WeightSelectorModal({
               <Scale className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-brand-charcoal dark:text-white">{product.name}</h3>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3 className="text-sm font-bold text-brand-charcoal dark:text-white">
+                  {product.name}
+                </h3>
+                {isPromoActive && (
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-black bg-red-600 text-white">
+                    <Tag className="h-2.5 w-2.5" />
+                    -{discountPercent}% OFF
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Preço por quilo: <strong className="text-brand-primary dark:text-brand-light">{formatCurrency(product.selling_price)}/kg</strong>
+                Preço por quilo:{' '}
+                {isPromoActive ? (
+                  <>
+                    <span className="line-through text-slate-400 mr-1">
+                      De {formatCurrency(originalPrice)}
+                    </span>
+                    <strong className="text-emerald-600 dark:text-emerald-400">
+                      Por {formatCurrency(effectivePrice)}/kg
+                    </strong>
+                  </>
+                ) : (
+                  <strong className="text-brand-primary dark:text-brand-light">
+                    {formatCurrency(effectivePrice)}/kg
+                  </strong>
+                )}
               </p>
             </div>
           </div>

@@ -1,16 +1,20 @@
 import * as React from 'react'
 import {
+  CheckCircle2,
+  Loader2,
   MessageCircle,
   Minus,
   Package,
   Plus,
-  Scale,
   ShoppingBag,
+  Tag,
+  Ticket,
   Trash2,
   Truck,
   X,
 } from 'lucide-react'
 import type {
+  CouponValidationResult,
   PortalCartItem,
   PortalPaymentMethod,
   PortalProduct,
@@ -20,6 +24,7 @@ import {
   formatCurrency,
   formatProductWeight,
   isWeighedProduct,
+  resolveEffectiveProductPrice,
 } from '../utils/portalFormatters'
 
 interface CartDrawerProps {
@@ -27,6 +32,7 @@ interface CartDrawerProps {
   onClose: () => void
   cart: PortalCartItem[]
   cartTotal: number
+  cartSubtotal: number
   store: PortalStore
   onUpdateQty: (productId: string, delta: number) => void
   onRemoveItem: (productId: string) => void
@@ -43,6 +49,13 @@ interface CartDrawerProps {
   setCustomerNotes: (v: string) => void
   paymentMethod: PortalPaymentMethod
   setPaymentMethod: (v: PortalPaymentMethod) => void
+  couponCode: string
+  setCouponCode: (v: string) => void
+  appliedCoupon: CouponValidationResult | null
+  couponError: string | null
+  validatingCoupon: boolean
+  onApplyCoupon: () => Promise<void>
+  onRemoveCoupon: () => void
   checkoutError: string | null
   primaryColor: string
 }
@@ -52,7 +65,7 @@ export function CartDrawer({
   onClose,
   cart,
   cartTotal,
-  store,
+  cartSubtotal,
   onUpdateQty,
   onRemoveItem,
   onAddProduct,
@@ -68,6 +81,13 @@ export function CartDrawer({
   setCustomerNotes,
   paymentMethod,
   setPaymentMethod,
+  couponCode,
+  setCouponCode,
+  appliedCoupon,
+  couponError,
+  validatingCoupon,
+  onApplyCoupon,
+  onRemoveCoupon,
   checkoutError,
   primaryColor,
 }: CartDrawerProps) {
@@ -132,7 +152,13 @@ export function CartDrawer({
               <div className="space-y-2.5">
                 {cart.map((item) => {
                   const isKg = isWeighedProduct(item.product)
-                  const lineTotal = item.quantity * item.product.selling_price
+                  const {
+                    effectivePrice,
+                    originalPrice,
+                    isPromoActive,
+                    discountPercent,
+                  } = resolveEffectiveProductPrice(item.product)
+                  const lineTotal = item.quantity * effectivePrice
 
                   return (
                     <div
@@ -140,7 +166,7 @@ export function CartDrawer({
                       className="flex items-center justify-between gap-3 p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/50"
                     >
                       {/* Miniatura */}
-                      <div className="h-12 w-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 overflow-hidden shrink-0 flex items-center justify-center p-1">
+                      <div className="relative h-12 w-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 overflow-hidden shrink-0 flex items-center justify-center p-1">
                         {item.product.primary_image_url ? (
                           <img
                             src={item.product.primary_image_url}
@@ -154,15 +180,37 @@ export function CartDrawer({
 
                       {/* Informações */}
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                          {item.product.name}
-                        </p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                            {item.product.name}
+                          </p>
+                          {isPromoActive && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-black bg-red-600 text-white shrink-0">
+                              <Tag className="h-2.5 w-2.5" />
+                              -{discountPercent}% OFF
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-slate-500">
-                          {isKg
-                            ? `${formatProductWeight(item.quantity)} × ${formatCurrency(
-                                item.product.selling_price
-                              )}/kg`
-                            : `${item.quantity} un × ${formatCurrency(item.product.selling_price)}`}
+                          {isPromoActive ? (
+                            <>
+                              <span className="line-through text-slate-400 mr-1">
+                                De {formatCurrency(originalPrice)}
+                              </span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                                Por {formatCurrency(effectivePrice)}
+                                {isKg ? '/kg' : ''}
+                              </span>
+                              {' • '}
+                              {isKg ? formatProductWeight(item.quantity) : `${item.quantity} un`}
+                            </>
+                          ) : isKg ? (
+                            `${formatProductWeight(item.quantity)} × ${formatCurrency(
+                              effectivePrice
+                            )}/kg`
+                          ) : (
+                            `${item.quantity} un × ${formatCurrency(effectivePrice)}`
+                          )}
                         </p>
                       </div>
 
@@ -212,6 +260,71 @@ export function CartDrawer({
                     </div>
                   )
                 })}
+              </div>
+
+              {/* Cupom de Desconto */}
+              <div className="space-y-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <label className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-400">
+                  <Ticket className="h-3.5 w-3.5 text-brand-primary dark:text-brand-light" />
+                  <span>Cupom de Desconto</span>
+                </label>
+
+                {appliedCoupon && appliedCoupon.valid ? (
+                  <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                    <div className="flex items-start gap-2 min-w-0">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-emerald-700 dark:text-emerald-300 truncate">
+                          Cupom {appliedCoupon.code} ativo (-{formatCurrency(appliedCoupon.discount_amount)})
+                        </p>
+                        {appliedCoupon.message && (
+                          <p className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90">
+                            {appliedCoupon.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={onRemoveCoupon}
+                      className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-red-600 dark:text-red-400 hover:bg-red-500/10 transition shrink-0"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Digite seu código promocional"
+                      className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-bold uppercase text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                    />
+                    <button
+                      type="button"
+                      disabled={validatingCoupon || !couponCode.trim()}
+                      onClick={onApplyCoupon}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black text-white shadow-2xs transition hover:opacity-95 disabled:opacity-50"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      {validatingCoupon ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span>Validando...</span>
+                        </>
+                      ) : (
+                        <span>Aplicar</span>
+                      )}
+                    </button>
+                  </div>
+                )}
+
+                {couponError && (
+                  <p className="text-[11px] font-bold text-red-600 dark:text-red-400">
+                    {couponError}
+                  </p>
+                )}
               </div>
 
               {/* Formulário de Identificação & Entrega */}
@@ -301,11 +414,33 @@ export function CartDrawer({
         {/* Rodapé com Resumo e Finalização */}
         {cart.length > 0 && (
           <div className="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500">Total do Pedido:</span>
-              <span className="text-xl font-black text-brand-primary dark:text-brand-light">
-                {formatCurrency(cartTotal)}
-              </span>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span className="font-semibold">Subtotal:</span>
+                <span className="font-bold text-slate-700 dark:text-slate-200">
+                  {formatCurrency(cartSubtotal)}
+                </span>
+              </div>
+
+              {appliedCoupon && appliedCoupon.valid && appliedCoupon.discount_amount > 0 && (
+                <div className="flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                  <span className="font-bold">
+                    Desconto Cupom ({appliedCoupon.code}):
+                  </span>
+                  <span className="font-black">
+                    -{formatCurrency(appliedCoupon.discount_amount)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-200/70 dark:border-slate-800">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                  Total Final:
+                </span>
+                <span className="text-xl font-black text-brand-primary dark:text-brand-light">
+                  {formatCurrency(cartTotal)}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-2">

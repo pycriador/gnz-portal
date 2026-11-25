@@ -467,6 +467,23 @@ export function OrderTrackingView({ orderId, onBackToCatalog }: OrderTrackingVie
               )
             })}
           </div>
+
+          {Number(order.discount_amount || 0) > 0 && (
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1 text-xs">
+              <div className="flex items-center justify-between text-slate-500">
+                <span>Subtotal dos Itens:</span>
+                <span className="font-semibold">{formatCurrency(order.subtotal)}</span>
+              </div>
+              <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 font-bold">
+                <span>Desconto Aplicado:</span>
+                <span>-{formatCurrency(order.discount_amount)}</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-900 dark:text-white font-black pt-1">
+                <span>Total Final:</span>
+                <span>{formatCurrency(order.total_amount)}</span>
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <PwaInstallPrompt />

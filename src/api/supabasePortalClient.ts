@@ -1,6 +1,7 @@
 import { createClient, type RealtimeChannel } from '@supabase/supabase-js'
 import { portalConfig, isPortalConfigured } from '../config/portal.config'
 import type {
+  CouponValidationResult,
   PortalCategory,
   PortalCredentialStatus,
   PortalOrderStatus,
@@ -10,12 +11,14 @@ import type {
   PortalStore,
 } from '../types/portal.types'
 
+export type { CouponValidationResult }
+
 /**
  * Colunas estritamente públicas dos produtos.
  * Jamais projeta cost_price, min_stock ou max_stock para o navegador.
  */
 const PUBLIC_PRODUCT_COLUMNS =
-  'id, store_id, name, sku, barcode, description, unit, selling_price, category_id, is_active, is_published_catalog'
+  'id, store_id, name, sku, barcode, description, unit, selling_price, is_on_promotion, promotional_price, promo_discount_percent, promo_has_expiration, promo_starts_at, promo_ends_at, promo_label, category_id, is_active, is_published_catalog'
 
 function buildAccentRegex(term: string): string {
   const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -89,6 +92,25 @@ export function classifyPortalApiError(err: unknown): PortalCredentialStatus | n
   }
 
   return null
+}
+
+export async function validateStoreCoupon(params: {
+  storeId: string
+  couponCode: string
+  customerPhone?: string
+  items: Array<{ productId: string; quantity: number }>
+}): Promise<CouponValidationResult> {
+  const { data, error } = await portalSupabase.rpc('validate_store_coupon', {
+    p_store_id: params.storeId,
+    p_coupon_code: params.couponCode.trim().toUpperCase(),
+    p_customer_phone: params.customerPhone?.trim() || null,
+    p_items: params.items.map((i) => ({
+      productId: i.productId,
+      quantity: i.quantity,
+    })),
+  })
+  if (error) throw error
+  return data as CouponValidationResult
 }
 
 export const supabasePortalApi = {
@@ -290,6 +312,15 @@ export const supabasePortalApi = {
         description: row.description,
         unit: row.unit || 'UN',
         selling_price: Number(row.selling_price || 0),
+        is_on_promotion: Boolean(row.is_on_promotion),
+        promotional_price:
+          row.promotional_price != null ? Number(row.promotional_price) : null,
+        promo_discount_percent:
+          row.promo_discount_percent != null ? Number(row.promo_discount_percent) : null,
+        promo_has_expiration: Boolean(row.promo_has_expiration),
+        promo_starts_at: row.promo_starts_at || null,
+        promo_ends_at: row.promo_ends_at || null,
+        promo_label: row.promo_label || null,
         category_id: row.category_id,
         category_name: row.categories?.name || undefined,
         is_active: Boolean(row.is_active),
@@ -306,6 +337,11 @@ export const supabasePortalApi = {
   },
 
   /**
+   * Valida um cupom de desconto da loja (primeira compra, não acumulativo, valor mínimo/máximo, validade).
+   */
+  validateStoreCoupon,
+
+  /**
    * Cria um pedido online diretamente na loja configurada no portal via RPC atômica,
    * baixando estoque e notificando `/orders` em tempo real.
    */
@@ -315,6 +351,7 @@ export const supabasePortalApi = {
     deliveryAddress?: string
     paymentMethod: PortalPaymentMethod
     notes?: string
+    couponCode?: string | null
     items: Array<{ productId: string; quantity: number; unitPrice: number }>
   }): Promise<{
     id: string
@@ -323,8 +360,9 @@ export const supabasePortalApi = {
     total_amount: number
     created_at: string
   }> {
+    const activeRuntimeStoreId = portalConfig.storeId
     const { data, error } = await portalSupabase.rpc('create_public_catalog_order', {
-      p_store_id: portalConfig.storeId,
+      p_store_id: activeRuntimeStoreId,
       p_customer_name: payload.customerName.trim(),
       p_customer_phone: payload.customerPhone.trim() || null,
       p_delivery_address: payload.deliveryAddress?.trim() || null,
@@ -335,6 +373,7 @@ export const supabasePortalApi = {
       })),
       p_payment_method: payload.paymentMethod || 'PIX',
       p_notes: payload.notes?.trim() || null,
+      p_coupon_code: payload.couponCode?.trim().toUpperCase() || null,
     })
 
     if (error) throw error

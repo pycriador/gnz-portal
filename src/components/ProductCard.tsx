@@ -1,7 +1,13 @@
 import * as React from 'react'
-import { Minus, Package, Plus, Scale } from 'lucide-react'
+import { Clock, Minus, Package, Plus, Scale, Tag } from 'lucide-react'
 import type { PortalCartItem, PortalProduct } from '../types/portal.types'
-import { formatCurrency, formatProductWeight, isWeighedProduct } from '../utils/portalFormatters'
+import {
+  formatCurrency,
+  formatProductWeight,
+  formatPromoShortDate,
+  isWeighedProduct,
+  resolveEffectiveProductPrice,
+} from '../utils/portalFormatters'
 
 interface ProductCardProps {
   product: PortalProduct
@@ -20,6 +26,14 @@ export function ProductCard({
 }: ProductCardProps) {
   const isKg = isWeighedProduct(product)
   const inCart = Boolean(cartItem)
+  const {
+    effectivePrice,
+    originalPrice,
+    isPromoActive,
+    discountPercent,
+    promoEndsAt,
+    promoLabel,
+  } = resolveEffectiveProductPrice(product)
 
   return (
     <article className="group h-full min-w-0 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs hover:shadow-lg hover:border-brand-primary/40 dark:hover:border-brand-light/40 transition-all duration-200 flex flex-col justify-between">
@@ -39,18 +53,42 @@ export function ProductCard({
           </div>
         )}
 
-        {/* Badge de Categoria */}
-        {product.category_name && (
-          <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 max-w-[calc(100%-3.5rem)] truncate px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/90 dark:bg-brand-charcoal/90 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs backdrop-blur-xs">
-            {product.category_name}
-          </span>
-        )}
+        {/* Badges Superiores Esquerda: Promoção ou Categoria */}
+        <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 max-w-[calc(100%-3.5rem)] flex flex-col items-start gap-1">
+          {isPromoActive ? (
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] font-black bg-red-600 text-white shadow-2xs">
+                <Tag className="h-2.5 w-2.5" />
+                <span>-{discountPercent}% OFF</span>
+              </span>
+              {promoLabel && (
+                <span className="truncate max-w-[110px] px-1.5 py-0.5 rounded-lg text-[9px] font-extrabold uppercase tracking-wide bg-amber-400 text-slate-950 shadow-2xs">
+                  {promoLabel}
+                </span>
+              )}
+            </div>
+          ) : (
+            product.category_name && (
+              <span className="truncate max-w-full px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/90 dark:bg-brand-charcoal/90 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs backdrop-blur-xs">
+                {product.category_name}
+              </span>
+            )
+          )}
+        </div>
 
         {/* Badge de Produto Pesável */}
         {isKg && (
           <span className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] font-black bg-brand-craft text-brand-charcoal shadow-2xs">
             <Scale className="h-3 w-3" />
             <span>Kg</span>
+          </span>
+        )}
+
+        {/* Data limite da promoção na base da imagem */}
+        {isPromoActive && promoEndsAt && (
+          <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-slate-900/85 text-amber-300 backdrop-blur-xs">
+            <Clock className="h-2.5 w-2.5" />
+            <span>Até {formatPromoShortDate(promoEndsAt)}</span>
           </span>
         )}
       </div>
@@ -77,22 +115,55 @@ export function ProductCard({
 
         {/* 3. Preço e Ação de Compra com Stepper Inline (Padrão Oba) */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
-          <div className="flex items-baseline justify-between">
-            <div className="flex items-baseline gap-1">
-              <span className="text-sm sm:text-base font-black text-brand-primary dark:text-brand-light tracking-tight">
-                {formatCurrency(product.selling_price)}
-              </span>
-              <span className="text-[11px] font-semibold text-slate-400">
-                /{(product.unit || 'UN').toLowerCase()}
-              </span>
+          {isPromoActive ? (
+            <div className="space-y-0.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-semibold text-slate-400 line-through">
+                  De {formatCurrency(originalPrice)}
+                </span>
+                {promoEndsAt && (
+                  <span className="text-[9px] font-bold text-red-600 dark:text-red-400">
+                    Até {formatPromoShortDate(promoEndsAt)}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-baseline justify-between">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                    Por
+                  </span>
+                  <span className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                    {formatCurrency(effectivePrice)}
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate-400">
+                    /{(product.unit || 'UN').toLowerCase()}
+                  </span>
+                </div>
+                {isKg && (
+                  <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">
+                    Aprox. 250g
+                  </span>
+                )}
+              </div>
             </div>
+          ) : (
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-1">
+                <span className="text-sm sm:text-base font-black text-brand-primary dark:text-brand-light tracking-tight">
+                  {formatCurrency(effectivePrice)}
+                </span>
+                <span className="text-[11px] font-semibold text-slate-400">
+                  /{(product.unit || 'UN').toLowerCase()}
+                </span>
+              </div>
 
-            {isKg && (
-              <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">
-                Aprox. 250g
-              </span>
-            )}
-          </div>
+              {isKg && (
+                <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">
+                  Aprox. 250g
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Stepper Inline: controle diretamente no card */}
           {inCart && cartItem ? (

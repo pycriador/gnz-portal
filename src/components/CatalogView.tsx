@@ -1,7 +1,12 @@
 import * as React from 'react'
-import { supabasePortalApi, classifyPortalApiError } from '../api/supabasePortalClient'
+import {
+  supabasePortalApi,
+  classifyPortalApiError,
+  validateStoreCoupon,
+} from '../api/supabasePortalClient'
 import { portalConfig } from '../config/portal.config'
 import type {
+  CouponValidationResult,
   PortalCartItem,
   PortalCategory,
   PortalCredentialStatus,
@@ -12,13 +17,13 @@ import type {
 } from '../types/portal.types'
 import {
   buildPortalOrderTrackingUrl,
-  formatCurrency,
   formatPortalWhatsAppOrderMessage,
   formatProductWeight,
   getPortalOrderHistory,
   getResolvedWhatsAppTemplate,
   isWeighedProduct,
   normalizeWhatsAppPhone,
+  resolveEffectiveProductPrice,
   savePortalOrderHistory,
 } from '../utils/portalFormatters'
 import { Header } from './Header'
@@ -94,6 +99,12 @@ export function CatalogView({
   const [checkoutError, setCheckoutError] = React.useState<string | null>(null)
   const [submitting, setSubmitting] = React.useState(false)
 
+  // Cupom de desconto (nunca aplicado automaticamente; somente por ação explícita do cliente)
+  const [couponCode, setCouponCode] = React.useState('')
+  const [appliedCoupon, setAppliedCoupon] = React.useState<CouponValidationResult | null>(null)
+  const [couponError, setCouponError] = React.useState<string | null>(null)
+  const [validatingCoupon, setValidatingCoupon] = React.useState(false)
+
   // Histórico de pedidos no dispositivo
   const [recentOrders, setRecentOrders] = React.useState<PortalStoredOrderHistoryItem[]>(() =>
     getPortalOrderHistory(store.id)
@@ -131,6 +142,19 @@ export function CatalogView({
         setCategories(cats)
         setAllProducts(prodsRes.data)
         setTotalProducts(prodsRes.total)
+
+        // Sincroniza itens da sacola persistida com os preços e promoções mais recentes do banco
+        if (prodsRes.data.length > 0) {
+          const byId = new Map(prodsRes.data.map((p) => [p.id, p]))
+          setCart((prev) =>
+            prev
+              .map((item) => {
+                const fresh = byId.get(item.product.id)
+                return fresh ? { ...item, product: fresh } : item
+              })
+              .filter((item) => item.product.is_active !== false)
+          )
+        }
       })
       .catch((err) => {
         if (!active) return
@@ -189,9 +213,17 @@ export function CatalogView({
     }
 
     if (sortBy === 'price_asc') {
-      list.sort((a, b) => a.selling_price - b.selling_price)
+      list.sort(
+        (a, b) =>
+          resolveEffectiveProductPrice(a).effectivePrice -
+          resolveEffectiveProductPrice(b).effectivePrice
+      )
     } else if (sortBy === 'price_desc') {
-      list.sort((a, b) => b.selling_price - a.selling_price)
+      list.sort(
+        (a, b) =>
+          resolveEffectiveProductPrice(b).effectivePrice -
+          resolveEffectiveProductPrice(a).effectivePrice
+      )
     } else if (sortBy === 'name_asc') {
       list.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
     }
@@ -206,10 +238,22 @@ export function CatalogView({
     return filteredProducts.slice(from, from + pageSize)
   }, [filteredProducts, page, pageSize])
 
-  const cartTotal = React.useMemo(
-    () => cart.reduce((acc, item) => acc + item.quantity * item.product.selling_price, 0),
+  const cartSubtotal = React.useMemo(
+    () =>
+      cart.reduce(
+        (acc, item) =>
+          acc + item.quantity * resolveEffectiveProductPrice(item.product).effectivePrice,
+        0
+      ),
     [cart]
   )
+
+  const cartTotal = React.useMemo(() => {
+    if (appliedCoupon && appliedCoupon.valid) {
+      return Math.max(0, cartSubtotal - Number(appliedCoupon.discount_amount || 0))
+    }
+    return cartSubtotal
+  }, [cartSubtotal, appliedCoupon])
 
   const cartCount = React.useMemo(
     () =>
@@ -218,6 +262,86 @@ export function CatalogView({
       }, 0),
     [cart]
   )
+
+  // Validação explícita de cupom (somente quando o usuário clica em Aplicar)
+  const handleApplyCoupon = React.useCallback(async () => {
+    const cleanCode = couponCode.trim().toUpperCase()
+    if (!cleanCode || cart.length === 0) return
+
+    setValidatingCoupon(true)
+    setCouponError(null)
+    try {
+      const res = await validateStoreCoupon({
+        storeId: store.id,
+        couponCode: cleanCode,
+        customerPhone: customerPhone.trim() || undefined,
+        items: cart.map((item) => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+        })),
+      })
+
+      if (res.valid) {
+        setAppliedCoupon(res)
+        setCouponCode(res.code || cleanCode)
+        setCouponError(null)
+      } else {
+        setAppliedCoupon(null)
+        setCouponError(res.message || 'Cupom inválido ou não aplicável a este pedido.')
+      }
+    } catch (err: any) {
+      setAppliedCoupon(null)
+      setCouponError(err?.message || 'Não foi possível validar o cupom no momento.')
+    } finally {
+      setValidatingCoupon(false)
+    }
+  }, [couponCode, cart, store.id, customerPhone])
+
+  const handleRemoveCoupon = React.useCallback(() => {
+    setAppliedCoupon(null)
+    setCouponCode('')
+    setCouponError(null)
+  }, [])
+
+  // Revalida automaticamente um cupom JÁ aplicado caso os itens do carrinho ou o telefone mudem
+  React.useEffect(() => {
+    if (!appliedCoupon?.valid || !appliedCoupon.code) return
+    if (cart.length === 0) {
+      setAppliedCoupon(null)
+      setCouponError(null)
+      return
+    }
+
+    let cancelled = false
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await validateStoreCoupon({
+          storeId: store.id,
+          couponCode: appliedCoupon.code,
+          customerPhone: customerPhone.trim() || undefined,
+          items: cart.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+        })
+        if (cancelled) return
+        if (res.valid) {
+          setAppliedCoupon(res)
+          setCouponError(null)
+        } else {
+          setAppliedCoupon(null)
+          setCouponError(res.message || 'O cupom deixou de atender às regras da sacola.')
+        }
+      } catch {
+        // mantém estado atual em caso de oscilação momentânea de rede
+      }
+    }, 300)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [cart, customerPhone, store.id, appliedCoupon?.valid, appliedCoupon?.code])
 
   const handleAddProduct = (product: PortalProduct) => {
     if (isWeighedProduct(product)) {
@@ -310,16 +434,20 @@ export function CatalogView({
 
     setSubmitting(true)
     try {
+      const activeCouponCode =
+        appliedCoupon && appliedCoupon.valid ? appliedCoupon.code : null
+
       const created = await supabasePortalApi.createCatalogOrder({
         customerName,
         customerPhone,
         deliveryAddress: customerAddress,
         paymentMethod,
         notes: customerNotes,
+        couponCode: activeCouponCode,
         items: cart.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
-          unitPrice: item.product.selling_price,
+          unitPrice: resolveEffectiveProductPrice(item.product).effectivePrice,
         })),
       })
 
@@ -350,11 +478,15 @@ export function CatalogView({
           notes: customerNotes,
           trackingUrl,
           totalAmount: created.total_amount,
+          subtotalAmount: cartSubtotal,
+          couponCode: activeCouponCode,
+          couponDiscountAmount:
+            appliedCoupon && appliedCoupon.valid ? appliedCoupon.discount_amount : 0,
           createdAt: created.created_at,
           items: cart.map((c) => ({
             name: c.product.name,
             quantity: c.quantity,
-            unitPrice: c.product.selling_price,
+            unitPrice: resolveEffectiveProductPrice(c.product).effectivePrice,
             isWeighed: isWeighedProduct(c.product),
             weightLabel: isWeighedProduct(c.product)
               ? formatProductWeight(c.quantity)
@@ -369,6 +501,9 @@ export function CatalogView({
       }
 
       setCart([])
+      setAppliedCoupon(null)
+      setCouponCode('')
+      setCouponError(null)
       setIsCartOpen(false)
       onOpenOrderTracking(created.id)
     } catch (err: any) {
@@ -608,6 +743,7 @@ export function CatalogView({
         onClose={() => setIsCartOpen(false)}
         cart={cart}
         cartTotal={cartTotal}
+        cartSubtotal={cartSubtotal}
         store={store}
         onUpdateQty={handleUpdateQty}
         onRemoveItem={handleRemoveItem}
@@ -624,6 +760,13 @@ export function CatalogView({
         setCustomerNotes={setCustomerNotes}
         paymentMethod={paymentMethod}
         setPaymentMethod={setPaymentMethod}
+        couponCode={couponCode}
+        setCouponCode={setCouponCode}
+        appliedCoupon={appliedCoupon}
+        couponError={couponError}
+        validatingCoupon={validatingCoupon}
+        onApplyCoupon={handleApplyCoupon}
+        onRemoveCoupon={handleRemoveCoupon}
         checkoutError={checkoutError}
         primaryColor={primaryColor}
       />
