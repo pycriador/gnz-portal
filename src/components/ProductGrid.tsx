@@ -6,6 +6,7 @@ import {
   Package,
   RotateCcw,
   Scale,
+  Tag,
 } from 'lucide-react'
 import type { PortalCartItem, PortalProduct } from '../types/portal.types'
 import { ProductCard } from './ProductCard'
@@ -21,6 +22,8 @@ interface ProductGridProps {
   onSortChange: (sort: string) => void
   onlyKg: boolean
   onToggleOnlyKg: () => void
+  onlyPromotions?: boolean
+  onToggleOnlyPromotions?: () => void
   page: number
   totalPages: number
   onPageChange: (newPage: number) => void
@@ -42,6 +45,8 @@ export function ProductGrid({
   onSortChange,
   onlyKg,
   onToggleOnlyKg,
+  onlyPromotions = false,
+  onToggleOnlyPromotions,
   page,
   totalPages,
   onPageChange,
@@ -74,6 +79,22 @@ export function ProductGrid({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* Filtro Rápido: Somente em Promoção */}
+          {onToggleOnlyPromotions && (
+            <button
+              type="button"
+              onClick={onToggleOnlyPromotions}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition border ${
+                onlyPromotions
+                  ? 'bg-red-600 text-white border-red-600 shadow-2xs'
+                  : 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20'
+              }`}
+            >
+              <Tag className="h-3.5 w-3.5" />
+              <span>Em Promoção</span>
+            </button>
+          )}
+
           {/* Filtro Rápido: Somente Pesáveis (Kg) */}
           <button
             type="button"

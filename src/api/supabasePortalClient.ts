@@ -8,6 +8,7 @@ import type {
   PortalOrderTracking,
   PortalPaymentMethod,
   PortalProduct,
+  PortalProductPromoConfig,
   PortalStore,
 } from '../types/portal.types'
 
@@ -245,6 +246,7 @@ export const supabasePortalApi = {
     maxPrice?: number
     page?: number
     pageSize?: number
+    themePromotions?: Record<string, PortalProductPromoConfig> | null
   }): Promise<{ data: PortalProduct[]; total: number }> {
     const {
       search,
@@ -252,7 +254,8 @@ export const supabasePortalApi = {
       minPrice,
       maxPrice,
       page = 1,
-      pageSize = portalConfig.branding.defaultPageSize,
+      pageSize = 500,
+      themePromotions,
     } = params
 
     const from = (page - 1) * pageSize
@@ -317,6 +320,31 @@ export const supabasePortalApi = {
         return (a.display_order || 0) - (b.display_order || 0)
       })
       const primary = images.find((img) => img.is_primary) || images[0]
+      const themePromo = themePromotions?.[row.id]
+
+      const isOnPromotion =
+        row.is_on_promotion != null
+          ? Boolean(row.is_on_promotion)
+          : Boolean(themePromo?.is_on_promotion)
+
+      const promotionalPrice =
+        row.promotional_price != null && Number(row.promotional_price) > 0
+          ? Number(row.promotional_price)
+          : themePromo?.promotional_price != null
+          ? Number(themePromo.promotional_price)
+          : null
+
+      const promoDiscountPercent =
+        row.promo_discount_percent != null && Number(row.promo_discount_percent) > 0
+          ? Number(row.promo_discount_percent)
+          : themePromo?.promo_discount_percent != null
+          ? Number(themePromo.promo_discount_percent)
+          : null
+
+      const promoHasExpiration =
+        row.promo_has_expiration != null
+          ? Boolean(row.promo_has_expiration)
+          : Boolean(themePromo?.promo_has_expiration)
 
       return {
         id: row.id,
@@ -327,15 +355,13 @@ export const supabasePortalApi = {
         description: row.description,
         unit: row.unit || 'UN',
         selling_price: Number(row.selling_price || 0),
-        is_on_promotion: Boolean(row.is_on_promotion),
-        promotional_price:
-          row.promotional_price != null ? Number(row.promotional_price) : null,
-        promo_discount_percent:
-          row.promo_discount_percent != null ? Number(row.promo_discount_percent) : null,
-        promo_has_expiration: Boolean(row.promo_has_expiration),
-        promo_starts_at: row.promo_starts_at || null,
-        promo_ends_at: row.promo_ends_at || null,
-        promo_label: row.promo_label || null,
+        is_on_promotion: isOnPromotion || Boolean(themePromo?.is_on_promotion),
+        promotional_price: promotionalPrice,
+        promo_discount_percent: promoDiscountPercent,
+        promo_has_expiration: promoHasExpiration,
+        promo_starts_at: row.promo_starts_at || themePromo?.promo_starts_at || null,
+        promo_ends_at: row.promo_ends_at || themePromo?.promo_ends_at || null,
+        promo_label: row.promo_label || themePromo?.promo_label || null,
         category_id: row.category_id,
         category_name: row.categories?.name || undefined,
         is_active: Boolean(row.is_active),
@@ -465,6 +491,44 @@ export const supabasePortalApi = {
         (payload) => {
           const nextStatus = (payload.new as any)?.status as PortalOrderStatus | undefined
           onOrderUpdated(nextStatus)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      portalSupabase.removeChannel(channel)
+    }
+  },
+
+  /**
+   * Assina atualizações em tempo real dos produtos e configurações da loja (promoções, preços, estoque)
+   * via Supabase Realtime para refletir imediatamente no portal SPA.
+   */
+  subscribeToCatalogRealtime(onCatalogUpdated: () => void): () => void {
+    const channel: RealtimeChannel = portalSupabase
+      .channel(`portal-catalog-sync-${portalConfig.storeId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products',
+          filter: `store_id=eq.${portalConfig.storeId}`,
+        },
+        () => {
+          onCatalogUpdated()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'stores',
+          filter: `id=eq.${portalConfig.storeId}`,
+        },
+        () => {
+          onCatalogUpdated()
         }
       )
       .subscribe()

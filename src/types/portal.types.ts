@@ -22,6 +22,16 @@ export interface PortalWhatsAppTemplateItem {
   updatedAt?: string
 }
 
+export interface PortalProductPromoConfig {
+  is_on_promotion?: boolean
+  promotional_price?: number | null
+  promo_discount_percent?: number | null
+  promo_has_expiration?: boolean
+  promo_starts_at?: string | null
+  promo_ends_at?: string | null
+  promo_label?: string | null
+}
+
 export interface PortalStoreThemeConfig {
   catalogTheme?: string
   primaryColor?: string
@@ -34,6 +44,7 @@ export interface PortalStoreThemeConfig {
   whatsappOrderMessage?: string
   whatsappOrderTemplates?: PortalWhatsAppTemplateItem[]
   pinnedWhatsappTemplateId?: string
+  productPromotions?: Record<string, PortalProductPromoConfig>
 }
 
 export interface PortalStore {

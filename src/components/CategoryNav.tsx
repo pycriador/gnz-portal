@@ -13,6 +13,7 @@ import {
   Leaf,
   Salad,
   Sprout,
+  Tag,
   Wheat,
 } from 'lucide-react'
 import type { PortalCategory } from '../types/portal.types'
@@ -21,6 +22,9 @@ interface CategoryNavProps {
   categories: PortalCategory[]
   selectedCategory: string
   onSelectCategory: (id: string) => void
+  onlyPromotions?: boolean
+  onSelectPromotions?: () => void
+  promoCount?: number
   totalProducts: number
   primaryColor: string
 }
@@ -50,14 +54,18 @@ export function CategoryNav({
   categories,
   selectedCategory,
   onSelectCategory,
+  onlyPromotions = false,
+  onSelectPromotions,
+  promoCount = 0,
   totalProducts,
   primaryColor,
 }: CategoryNavProps) {
   const [isMobileListOpen, setIsMobileListOpen] = React.useState(true)
   const listId = React.useId()
 
-  const activeCategoryName =
-    categories.find((c) => c.id === selectedCategory)?.name || 'Todos os Produtos'
+  const activeCategoryName = onlyPromotions
+    ? 'Promoções & Ofertas'
+    : categories.find((c) => c.id === selectedCategory)?.name || 'Todos os Produtos'
 
   return (
     <nav
@@ -106,29 +114,29 @@ export function CategoryNav({
           <li className="lg:shrink-0">
             <button
               type="button"
-              aria-current={selectedCategory === '' ? 'page' : undefined}
+              aria-current={selectedCategory === '' && !onlyPromotions ? 'page' : undefined}
               onClick={() => onSelectCategory('')}
               className={`w-full lg:w-auto flex items-center justify-between lg:justify-start gap-3 lg:gap-2 px-2.5 lg:px-3.5 py-2.5 lg:py-2 rounded-xl text-sm lg:text-xs font-semibold whitespace-nowrap transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary ${
-                selectedCategory === ''
+                selectedCategory === '' && !onlyPromotions
                   ? 'bg-brand-primary/8 lg:bg-brand-primary text-brand-primary dark:text-brand-light lg:text-white lg:shadow-2xs'
                   : 'text-brand-charcoal dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 lg:hover:bg-slate-100'
               }`}
               style={
-                selectedCategory === ''
+                selectedCategory === '' && !onlyPromotions
                   ? ({ '--active-bg': primaryColor } as React.CSSProperties)
                   : undefined
               }
             >
               <span
                 className={`flex items-center gap-3 lg:gap-2 lg:px-0 ${
-                  selectedCategory === ''
+                  selectedCategory === '' && !onlyPromotions
                     ? 'lg:text-white'
                     : ''
                 }`}
               >
                 <span
                   className={`h-9 w-9 lg:h-auto lg:w-auto rounded-xl lg:rounded-none flex items-center justify-center shrink-0 transition-colors ${
-                    selectedCategory === ''
+                    selectedCategory === '' && !onlyPromotions
                       ? 'bg-brand-primary text-white lg:bg-transparent lg:text-current'
                       : 'bg-slate-100 dark:bg-slate-800 text-brand-primary dark:text-brand-light lg:bg-transparent lg:text-slate-500 dark:lg:text-slate-400'
                   }`}
@@ -144,7 +152,7 @@ export function CategoryNav({
               </span>
 
               <span className="lg:hidden shrink-0 text-slate-400">
-                {selectedCategory === '' ? (
+                {selectedCategory === '' && !onlyPromotions ? (
                   <Check className="h-4 w-4 text-brand-primary dark:text-brand-light" aria-hidden="true" />
                 ) : (
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -152,6 +160,48 @@ export function CategoryNav({
               </span>
             </button>
           </li>
+
+          {/* Item: Promoções & Ofertas */}
+          {onSelectPromotions && (
+            <li className="lg:shrink-0">
+              <button
+                type="button"
+                aria-current={onlyPromotions ? 'page' : undefined}
+                onClick={onSelectPromotions}
+                className={`w-full lg:w-auto flex items-center justify-between lg:justify-start gap-3 lg:gap-2 px-2.5 lg:px-3.5 py-2.5 lg:py-2 rounded-xl text-sm lg:text-xs font-bold whitespace-nowrap transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                  onlyPromotions
+                    ? 'bg-red-600 text-white shadow-2xs'
+                    : 'text-red-600 dark:text-red-400 bg-red-500/8 hover:bg-red-500/15'
+                }`}
+              >
+                <span className="flex items-center gap-3 lg:gap-2 min-w-0">
+                  <span
+                    className={`h-9 w-9 lg:h-auto lg:w-auto rounded-xl lg:rounded-none flex items-center justify-center shrink-0 transition-colors ${
+                      onlyPromotions
+                        ? 'bg-white/20 text-white lg:bg-transparent lg:text-white'
+                        : 'bg-red-500/15 text-red-600 dark:text-red-400 lg:bg-transparent'
+                    }`}
+                  >
+                    <Tag className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="truncate">
+                    Promoções
+                    <span className="ml-1.5 text-xs font-extrabold">
+                      ({promoCount})
+                    </span>
+                  </span>
+                </span>
+
+                <span className="lg:hidden shrink-0">
+                  {onlyPromotions ? (
+                    <Check className="h-4 w-4 text-white" aria-hidden="true" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-red-400" aria-hidden="true" />
+                  )}
+                </span>
+              </button>
+            </li>
+          )}
 
           <li aria-hidden="true" className="hidden lg:block h-4 w-px bg-slate-200 dark:bg-slate-700 shrink-0 mx-1" />
 

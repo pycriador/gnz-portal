@@ -71,6 +71,7 @@ export function CatalogView({
   const [selectedCategory, setSelectedCategory] = React.useState('')
   const [sortBy, setSortBy] = React.useState('default')
   const [onlyKg, setOnlyKg] = React.useState(false)
+  const [onlyPromotions, setOnlyPromotions] = React.useState(false)
   const [page, setPage] = React.useState(1)
   const [pageSize, setPageSize] = React.useState<number>(24)
 
@@ -128,17 +129,26 @@ export function CatalogView({
     }
   }, [cart])
 
-  // Carrega categorias e catálogo completo da loja
-  React.useEffect(() => {
-    let active = true
-    setLoading(true)
+  // Carrega e sincroniza categorias, configurações de promoções da loja e catálogo completo
+  const loadCatalog = React.useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true)
+      try {
+        const [freshStore, cats] = await Promise.all([
+          supabasePortalApi.fetchStoreProfile().catch(() => store),
+          supabasePortalApi.fetchStoreCategories(),
+        ])
 
-    Promise.all([
-      supabasePortalApi.fetchStoreCategories(),
-      supabasePortalApi.fetchCatalogProducts({ pageSize: 100 }),
-    ])
-      .then(([cats, prodsRes]) => {
-        if (!active) return
+        const themePromos =
+          freshStore?.theme_config?.productPromotions ||
+          store.theme_config?.productPromotions ||
+          null
+
+        const prodsRes = await supabasePortalApi.fetchCatalogProducts({
+          pageSize: 500,
+          themePromotions: themePromos,
+        })
+
         setCategories(cats)
         setAllProducts(prodsRes.data)
         setTotalProducts(prodsRes.total)
@@ -155,20 +165,41 @@ export function CatalogView({
               .filter((item) => item.product.is_active !== false)
           )
         }
-      })
-      .catch((err) => {
-        if (!active) return
+      } catch (err) {
         const credErr = classifyPortalApiError(err)
         if (credErr) onCredentialInvalidated(credErr)
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
+      } finally {
+        if (!silent) setLoading(false)
+      }
+    },
+    [store, onCredentialInvalidated]
+  )
+
+  React.useEffect(() => {
+    loadCatalog(false)
+  }, [loadCatalog])
+
+  // Sincronização em tempo real (Realtime + foco de aba) quando promoções são aplicadas no painel
+  React.useEffect(() => {
+    const unsubscribe = supabasePortalApi.subscribeToCatalogRealtime(() => {
+      loadCatalog(true)
+    })
+
+    const onVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadCatalog(true)
+      }
+    }
+
+    window.addEventListener('focus', onVisibilityOrFocus)
+    document.addEventListener('visibilitychange', onVisibilityOrFocus)
 
     return () => {
-      active = false
+      unsubscribe()
+      window.removeEventListener('focus', onVisibilityOrFocus)
+      document.removeEventListener('visibilitychange', onVisibilityOrFocus)
     }
-  }, [onCredentialInvalidated])
+  }, [loadCatalog])
 
   // Mapeia produtos por categoria para as vitrines individuais
   const productsByCategory = React.useMemo(() => {
@@ -212,6 +243,10 @@ export function CatalogView({
       list = list.filter((p) => isWeighedProduct(p))
     }
 
+    if (onlyPromotions) {
+      list = list.filter((p) => resolveEffectiveProductPrice(p).isPromoActive)
+    }
+
     if (sortBy === 'price_asc') {
       list.sort(
         (a, b) =>
@@ -229,7 +264,7 @@ export function CatalogView({
     }
 
     setFilteredProducts(list)
-  }, [allProducts, search, selectedCategory, onlyKg, sortBy])
+  }, [allProducts, search, selectedCategory, onlyKg, onlyPromotions, sortBy])
 
   // Paginação dos produtos filtrados
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
@@ -398,6 +433,7 @@ export function CatalogView({
     setSearch('')
     setSelectedCategory('')
     setOnlyKg(false)
+    setOnlyPromotions(false)
     setSortBy('default')
     setPage(1)
   }
@@ -518,7 +554,12 @@ export function CatalogView({
     }
   }
 
-  const isBrowsingAll = !search && !selectedCategory
+  const promoCount = React.useMemo(
+    () => allProducts.filter((p) => resolveEffectiveProductPrice(p).isPromoActive).length,
+    [allProducts]
+  )
+
+  const isBrowsingAll = !search && !selectedCategory && !onlyPromotions
   const activeCategoryObj = categories.find((c) => c.id === selectedCategory)
   const { showInstallButton, triggerInstall } = usePwaInstall()
 
@@ -549,8 +590,16 @@ export function CatalogView({
         selectedCategory={selectedCategory}
         onSelectCategory={(id) => {
           setSelectedCategory(id)
+          setOnlyPromotions(false)
           setPage(1)
         }}
+        onlyPromotions={onlyPromotions}
+        onSelectPromotions={() => {
+          setOnlyPromotions((prev) => !prev)
+          setSelectedCategory('')
+          setPage(1)
+        }}
+        promoCount={promoCount}
         totalProducts={totalProducts}
         primaryColor={primaryColor}
       />
@@ -567,18 +616,7 @@ export function CatalogView({
               primaryColor={primaryColor}
             />
 
-            {/* Navegue por Categorias com Ícones Elegantes e Contagens */}
-            <CategoryCircles
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={(id) => {
-                setSelectedCategory(id)
-                setPage(1)
-              }}
-              productCountByCategory={productCountByCategory}
-            />
-
-            {/* Bloco de Ofertas da Semana com Imagem Preparada à Esquerda e Slider à Direita */}
+            {/* Bloco de Promoções & Ofertas da Loja em Destaque no Topo */}
             <div ref={offersRef}>
               <OffersShowcase
                 products={allProducts}
@@ -586,13 +624,26 @@ export function CatalogView({
                 onAddProduct={handleAddProduct}
                 onUpdateQty={handleUpdateQty}
                 onViewAllOffers={() => {
-                  setSortBy('price_asc')
+                  setOnlyPromotions(true)
                   setSelectedCategory('')
-                  window.scrollTo({ top: 900, behavior: 'smooth' })
+                  setPage(1)
+                  window.scrollTo({ top: 280, behavior: 'smooth' })
                 }}
                 primaryColor={primaryColor}
               />
             </div>
+
+            {/* Navegue por Categorias com Ícones Elegantes e Contagens */}
+            <CategoryCircles
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={(id) => {
+                setSelectedCategory(id)
+                setOnlyPromotions(false)
+                setPage(1)
+              }}
+              productCountByCategory={productCountByCategory}
+            />
 
             {/* Favoritos do Dia a Dia */}
             <DailyFavoritesSection
@@ -649,7 +700,12 @@ export function CatalogView({
                 <span>Voltar à vitrine principal</span>
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {onlyPromotions && (
+                  <span className="px-3 py-1 rounded-xl text-xs font-bold bg-red-600 text-white shadow-2xs">
+                    Promoções & Ofertas ({promoCount})
+                  </span>
+                )}
                 {activeCategoryObj && (
                   <span className="px-3 py-1 rounded-xl text-xs font-bold bg-brand-primary/10 text-brand-primary dark:text-brand-light border border-brand-primary/30">
                     Categoria: {activeCategoryObj.name}
@@ -675,6 +731,11 @@ export function CatalogView({
               onSortChange={setSortBy}
               onlyKg={onlyKg}
               onToggleOnlyKg={() => setOnlyKg((k) => !k)}
+              onlyPromotions={onlyPromotions}
+              onToggleOnlyPromotions={() => {
+                setOnlyPromotions((p) => !p)
+                setPage(1)
+              }}
               page={page}
               totalPages={totalPages}
               onPageChange={setPage}

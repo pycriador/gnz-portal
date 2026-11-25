@@ -28,15 +28,20 @@ export function OffersShowcase({
 }: OffersShowcaseProps) {
   const scrollRef = React.useRef<HTMLDivElement>(null)
 
-  // Seleciona os itens de destaque em oferta (priorizando produtos com promoção ativa)
+  // Filtra produtos com promoção vigente aplicada no painel da loja
+  const activePromos = React.useMemo(
+    () => products.filter((p) => resolveEffectiveProductPrice(p).isPromoActive),
+    [products]
+  )
+
+  // Se houver promoções ativas no painel, exibe exclusivamente elas na seção de Promoções;
+  // caso contrário, exibe até 8 produtos de destaque da loja.
   const offerProducts = React.useMemo(() => {
-    const activePromos = products.filter((p) => resolveEffectiveProductPrice(p).isPromoActive)
-    if (activePromos.length >= 10) {
-      return activePromos.slice(0, 12)
+    if (activePromos.length > 0) {
+      return activePromos
     }
-    const nonPromos = products.filter((p) => !resolveEffectiveProductPrice(p).isPromoActive)
-    return [...activePromos, ...nonPromos].slice(0, 10)
-  }, [products])
+    return [...products].slice(0, 8)
+  }, [activePromos, products])
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!scrollRef.current) return
@@ -51,20 +56,28 @@ export function OffersShowcase({
       {/* Cabeçalho da Seção */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-brand-craft/15 text-brand-craft flex items-center justify-center">
+          <div className="h-9 w-9 rounded-xl bg-red-500/15 text-red-600 dark:text-red-400 flex items-center justify-center">
             <Tag className="h-4 w-4" aria-hidden="true" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-base sm:text-lg font-bold text-brand-charcoal dark:text-white tracking-tight">
-                Ofertas da Semana
+                {activePromos.length > 0 ? 'Promoções & Ofertas da Loja' : 'Ofertas da Semana'}
               </h2>
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-brand-craft/15 text-brand-charcoal dark:text-brand-craft">
-                Preços Especiais
-              </span>
+              {activePromos.length > 0 ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-black bg-red-600 text-white">
+                  {activePromos.length} {activePromos.length === 1 ? 'item em promoção' : 'itens em promoção'}
+                </span>
+              ) : (
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-brand-craft/15 text-brand-charcoal dark:text-brand-craft">
+                  Preços Especiais
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Itens selecionados com condições especiais para esta semana
+              {activePromos.length > 0
+                ? 'Produtos com desconto promocional ativo direto do estoque da loja'
+                : 'Itens selecionados com condições especiais para esta semana'}
             </p>
           </div>
         </div>
@@ -122,7 +135,11 @@ export function OffersShowcase({
                 onClick={onViewAllOffers}
                 className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white text-brand-charcoal text-xs font-bold shadow-sm hover:bg-neutral-100 transition active:scale-[0.98]"
               >
-                <span>Ver todas as ofertas</span>
+                <span>
+                  {activePromos.length > 0
+                    ? `Ver todas as promoções (${activePromos.length})`
+                    : 'Ver todas as ofertas'}
+                </span>
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
